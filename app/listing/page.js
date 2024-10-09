@@ -1,24 +1,52 @@
 'use client'
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import styles from '../styles/Listing.module.css'
 
 import { collection, addDoc, getFirestore, serverTimestamp} from 'firebase/firestore';
 import { app } from '../../firebaseConfig';
 
-const db = getFirestore(app)
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+const db = getFirestore(app)
+const storage = getStorage(app)
 
 const  ListingForm = () => {
   const [productName, setProductName] = useState('');//商品名
   const [productDetails, setProductDetails] = useState('');//商品の詳細
-  const [category, setCategory] = useState('option1');//カテゴリー
+  const [category, setCategory] = useState('ファッション');//カテゴリー
   const [price, setPrice] = useState('');//金額
   const [location, setLocation] = useState('');//受取場所
 
+  const [image, setImage] = useState(null);  // 選択された画像ファイルを保存
+  const [previewUrl, setPreviewUrl] = useState('');  // プレビュー用の画像URL
 
-  const handleChange = (event) => {
+  const categoryselect = [
+    {name:"ファッション"},
+    {name:"家電・デジタル機器"},
+    {name:"家具インテリア"},
+    {name:"ホビー・本"},
+    {name:"スポーツ・アウトドア"},
+    {name:"美容・健康"},
+    {name:"チケット・サービズ"},
+    {name:"その他"}
+  ]
+
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setImage(selectedFile);  // 選択されたファイルを保存
+
+      // FileReaderを使って画像のプレビューを表示
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);  // 読み込んだ画像データURLを設定
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
+  const handleCategory = (event) => {
     setCategory(event.target.value);
   };
 
@@ -34,9 +62,27 @@ const  ListingForm = () => {
       statas:"販売中",
       receive:location,
     });
+    if (!image) {
+      alert('画像を選択してください');
+      return;
+    }
+
+    if(!productName && !productDetails && !price && !location){
+      alert('入力されていない項目があります');
+      return;
+    }
+    // Firebase Storageの参照を作成
+    const storageRef = ref(storage, `images/${image.name}`);
 
     try {
-      // "Produts"というコレクションにデータを追加
+      // Firebase Storageに画像をアップロード
+      await uploadBytes(storageRef, image);
+      console.log('画像がアップロードされました');
+
+      // アップロードした画像のURLを取得
+      const downloadURL = await getDownloadURL(storageRef);
+
+      //Firebaseにデータの送信
       const docRef = await addDoc(collection(db, 'Produts'), {
         productName,
         productDetails,
@@ -45,35 +91,42 @@ const  ListingForm = () => {
         location,
         statas:"販売中",
         create_at:serverTimestamp(),
+        image:downloadURL,
         seller_id:1
       });
-      console.log(docRef.id)
+
+      //入力を空にする
       alert('データがアップロードされました');
       setProductName('')
       setProductDetails('')
       setCategory('option1')
       setPrice('')
       setLocation('')
+      setPreviewUrl('')
+      setImage('')
+
+
     } catch (error) {
-      console.error('エラーが発生しました:', error);
-      alert('データのアップロードに失敗しました');
+      console.error('画像のアップロード中にエラーが発生しました:', error);
+      alert('画像のアップロードに失敗しました。');
     }
   };
 
   return (
     <div className={styles.container}>
       <button className={styles.backButton}>&lt;</button>
+
       <div className={styles.imageBox}>
         <span>
             <div>
-            <Image
-                src="/amaebi_computer.png"
-                width={800}
-                height={800}
-                layout="responsive"
-                className={styles.image}
-                alt="商品画像"
-            />
+              <div>
+                <input type="file" accept="image/*" onChange={handleImageChange} />                
+                {previewUrl && (
+                  <div>
+                    <img src={previewUrl} alt="Preview" width="300" />
+                  </div>
+                )}
+              </div>
             </div>
         </span>
       </div>
@@ -103,14 +156,15 @@ const  ListingForm = () => {
             <select 
                 id="dropdown" 
                 value={category} 
-                onChange={handleChange}
+                onChange={handleCategory}
                 className={
                     styles.input
                 }
             >
-                <option value="option1">オプション 1</option>
-                <option value="option2">オプション 2</option>
-                <option value="option3">オプション 3</option>
+                {categoryselect.map((val, index) =>(
+                  <option key={index} value={val.name}>{val.name}</option>
+
+                ))}
             </select>
             <p>選択された値: {category}</p>
         </div>
