@@ -4,30 +4,60 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import styles from '../styles/Listing.module.css'
 
-const  ListingForm = () => {
-  const [productName, setProductName] = useState('');
-  const [productDetails, setProductDetails] = useState('');
-  const [category, setCategory] = useState('');
-  const [price, setPrice] = useState('');
-  const [location, setLocation] = useState('');
+import { collection, addDoc, getFirestore, serverTimestamp} from 'firebase/firestore';
+import { app } from '../../firebaseConfig';
 
-  const [selectedValue, setSelectedValue] = useState('option1');
+const db = getFirestore(app)
+
+
+const  ListingForm = () => {
+  const [productName, setProductName] = useState('');//商品名
+  const [productDetails, setProductDetails] = useState('');//商品の詳細
+  const [category, setCategory] = useState('option1');//カテゴリー
+  const [price, setPrice] = useState('');//金額
+  const [location, setLocation] = useState('');//受取場所
+
 
   const handleChange = (event) => {
-    setSelectedValue(event.target.value);
+    setCategory(event.target.value);
   };
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     // 出品処理をここに追加
     console.log({
-      productName,
-      productDetails,
+      name:productName,
+      description:productDetails,
       category,
       price,
-      location
+      statas:"販売中",
+      receive:location,
     });
+
+    try {
+      // "Produts"というコレクションにデータを追加
+      const docRef = await addDoc(collection(db, 'Produts'), {
+        productName,
+        productDetails,
+        category,
+        price:Number(price),
+        location,
+        statas:"販売中",
+        create_at:serverTimestamp(),
+        seller_id:1
+      });
+      console.log(docRef.id)
+      alert('データがアップロードされました');
+      setProductName('')
+      setProductDetails('')
+      setCategory('option1')
+      setPrice('')
+      setLocation('')
+    } catch (error) {
+      console.error('エラーが発生しました:', error);
+      alert('データのアップロードに失敗しました');
+    }
   };
 
   return (
@@ -72,7 +102,7 @@ const  ListingForm = () => {
             <label htmlFor="dropdown">カテゴリー</label>
             <select 
                 id="dropdown" 
-                value={selectedValue} 
+                value={category} 
                 onChange={handleChange}
                 className={
                     styles.input
@@ -82,7 +112,7 @@ const  ListingForm = () => {
                 <option value="option2">オプション 2</option>
                 <option value="option3">オプション 3</option>
             </select>
-            <p>選択された値: {selectedValue}</p>
+            <p>選択された値: {category}</p>
         </div>
 
         <div className={styles.inputGroup}>
@@ -112,64 +142,3 @@ const  ListingForm = () => {
 }
 
 export default ListingForm
-
-// const styles = {
-//   container: {
-//     fontFamily: 'Arial, sans-serif',
-//     padding: '20px',
-//     display: 'flex',
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//   },
-//   backButton: {
-//     fontSize: '20px',
-//     backgroundColor: 'transparent',
-//     border: 'none',
-//     cursor: 'pointer',
-//   },
-//   imageBox: {
-//     width: '500px',
-//     height: '500px',
-//     backgroundColor: '#d3d3d3',
-//     display: 'flex',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     fontSize: '24px',
-//     marginRight: '20px',
-//   },
-//   form: {
-//     flexGrow: 1,
-//     display: 'flex',
-//     flexDirection: 'column',
-//   },
-//   inputGroup: {
-//     marginBottom: '20px',
-//   },
-//   input: {
-//     width: '100%',
-//     padding: '10px',
-//     fontSize: '16px',
-//     marginTop: '5px',
-//     borderRadius: '5px',
-//     border: '1px solid #ccc',
-//   },
-//   textarea: {
-//     width: '100%',
-//     height: '100px',
-//     padding: '10px',
-//     fontSize: '16px',
-//     marginTop: '5px',
-//     borderRadius: '5px',
-//     border: '1px solid #ccc',
-//   },
-//   submitButton: {
-//     backgroundColor: '#ff5c5c',
-//     color: 'white',
-//     padding: '10px 20px',
-//     border: 'none',
-//     borderRadius: '5px',
-//     cursor: 'pointer',
-//     fontSize: '16px',
-//     marginBottom: '20px',
-//   },
-// };
