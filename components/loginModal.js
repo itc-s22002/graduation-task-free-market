@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect} from 'react';
 import Modal from 'react-modal';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Firebaseのログイン機能をインポート
+import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider} from 'firebase/auth'; // Firebaseのログイン機能をインポート
 import {app} from '../firebaseConfig'
+
+export const googleProvider = new GoogleAuthProvider();
 const auth = getAuth(app)
 Modal.setAppElement('body')
 
@@ -19,23 +21,30 @@ const customStyles = {
   },
 };
 
-
 const LoginModal = ({ isOpen, onRequestClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Firebase Authenticationでログイン
-  const handleLogin = async (e) => {
+  // メールアドレスとパスワードでログイン
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError('');
-
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('ログイン成功:', userCredential.user);
-      onRequestClose(); // ログイン成功後にモーダルを閉じる
+      await signInWithEmailAndPassword(auth, email, password);
+      onRequestClose();  // ログイン成功後にモーダルを閉じる
     } catch (error) {
       setError('ログインに失敗しました: ' + error.message);
+    }
+  };
+
+  // Googleアカウントでログイン
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      onRequestClose();  // ログイン成功後にモーダルを閉じる
+    } catch (error) {
+      setError('Googleでのログインに失敗しました: ' + error.message);
     }
   };
 
@@ -48,7 +57,7 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     >
       <h2>ログイン</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleEmailLogin}>
         <div>
           <label>Email:</label>
           <input
@@ -67,9 +76,11 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
             required
           />
         </div>
-        <button type="submit">ログイン</button>
-        <button type="button" onClick={onRequestClose}>キャンセル</button>
+        <button type="submit">メールアドレスでログイン</button>
       </form>
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={handleGoogleLogin}>Googleでログイン</button>
+      </div>
     </Modal>
   );
 };
