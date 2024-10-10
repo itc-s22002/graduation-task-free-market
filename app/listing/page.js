@@ -1,15 +1,19 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/Listing.module.css'
 
 import { collection, addDoc, getFirestore, serverTimestamp} from 'firebase/firestore';
 import { app } from '../../firebaseConfig';
 
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL} from 'firebase/storage';
+
+import LoginModal from '@/components/loginModal';
+import { getAuth,onAuthStateChanged } from 'firebase/auth';
 
 const db = getFirestore(app)
 const storage = getStorage(app)
+const auth = getAuth(app) 
 
 const  ListingForm = () => {
   const [productName, setProductName] = useState('');//商品名
@@ -20,6 +24,28 @@ const  ListingForm = () => {
 
   const [image, setImage] = useState(null);  // 選択された画像ファイルを保存
   const [previewUrl, setPreviewUrl] = useState('');  // プレビュー用の画像URL
+
+  const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
+
+  const [user, setUser] = useState(null);//ユーザー情報
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ログインしている場合
+        setUser(user);
+      } else {
+        // ログインしていない場合
+        setUser(null);
+        setIsModalOpen(true);
+      }
+      setLoading(false);
+    });
+
+    // クリーンアップ
+    return () => unsubscribe();
+  }, []);
 
   const categoryselect = [
     {name:"ファッション"},
@@ -32,6 +58,7 @@ const  ListingForm = () => {
     {name:"その他"}
   ]
 
+  //画像の選択
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -50,7 +77,7 @@ const  ListingForm = () => {
     setCategory(event.target.value);
   };
 
-
+  //出品商品情報をアップロート
   const handleSubmit = async(e) => {
     e.preventDefault();
     // 出品処理をここに追加
@@ -92,7 +119,7 @@ const  ListingForm = () => {
         statas:"販売中",
         create_at:serverTimestamp(),
         image:downloadURL,
-        seller_id:1
+        seller_id:user.email
       });
 
       //入力を空にする
@@ -107,15 +134,38 @@ const  ListingForm = () => {
 
 
     } catch (error) {
-      console.error('画像のアップロード中にエラーが発生しました:', error);
-      alert('画像のアップロードに失敗しました。');
+      console.error('アップロード中にエラーが発生しました:', error);
+      alert('アップロードに失敗しました。');
     }
   };
+
+  //ログインモーダルの表示
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  //ログインモーダルの非表示
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;  // ロード中の表示
+  }
 
   return (
     <div className={styles.container}>
       <button className={styles.backButton}>&lt;</button>
-
+      {user?(
+        <div>
+          <p>{user.email}</p>
+          <button onClick={() => auth.signOut()}>ログアウト</button>  {/* ログアウトボタン */}
+        </div>
+      ):(
+        <div>
+          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+        </div>
+      )}
       <div className={styles.imageBox}>
         <span>
             <div>
