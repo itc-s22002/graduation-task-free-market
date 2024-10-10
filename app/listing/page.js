@@ -172,7 +172,7 @@ const  ListingForm = () => {
               <input type="file" accept="image/*" onChange={handleImageChange} />                
               {previewUrl && (
                 <div>
-                  <img src={previewUrl} alt="Preview" width="300" />
+                  <img src={previewUrl} alt="Preview" width="300"/>
                 </div>
               )}
             </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect} from 'react';
 import Modal from 'react-modal';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider} from 'firebase/auth'; // Firebaseのログイン機能をインポート
 import {app} from '../firebaseConfig'
+import styles from './styles/loginModal.module.css'
 
 export const googleProvider = new GoogleAuthProvider();
 const auth = getAuth(app)
@@ -52,34 +53,40 @@ const LoginModal = ({ isOpen, onRequestClose }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      style={customStyles}
-      contentLabel="Login Modal"
+      className={styles.modalOverlay}
+      overlayClassName={styles.modalOverlay}
     >
-      <h2>ログイン</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleEmailLogin}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">メールアドレスでログイン</button>
-      </form>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={handleGoogleLogin}>Googleでログイン</button>
+      <div className={styles.modalContent}>
+        <h2 className={styles.modalTitle}>ログイン</h2>
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        <form onSubmit={handleEmailLogin}>
+          <div className={styles.formGroup}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={styles.formInput}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={styles.formInput}
+              required
+            />
+          </div>
+          <button type="submit" className={styles.primaryButton}>
+            メールアドレスでログイン
+          </button>
+        </form>
+        <button className={styles.googleButton} onClick={handleGoogleLogin}>
+          Googleでログイン
+        </button>
       </div>
     </Modal>
   );
