@@ -119,14 +119,12 @@ const  ListingForm = () => {
       <div className={styles.imageBox}>
         <span>
             <div>
-              <div>
-                <input type="file" accept="image/*" onChange={handleImageChange} />                
-                {previewUrl && (
-                  <div>
-                    <img src={previewUrl} alt="Preview" width="300" />
-                  </div>
-                )}
-              </div>
+              <input type="file" accept="image/*" onChange={handleImageChange} />                
+              {previewUrl && (
+                <div>
+                  <img src={previewUrl} alt="Preview" width="300" />
+                </div>
+              )}
             </div>
         </span>
       </div>
@@ -194,5 +192,4 @@ const  ListingForm = () => {
     </div>
   );
 }
-
 export default ListingForm
