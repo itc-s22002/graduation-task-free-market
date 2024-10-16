@@ -1,12 +1,40 @@
-import React from 'react';
+"use client"; // このコンポーネントがクライアントコンポーネントであることを示す
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // useRouterをnext/navigationからインポート
 
 export default function Home() {
+    const router = useRouter(); // useRouterフックを使用
+    const [searchTerm, setSearchTerm] = useState(''); // 検索キーワードの状態
+    const [products] = useState(Array(8).fill('商品')); // 商品リストの初期化
+
+    const handleProfileClick = () => {
+        router.push('/profile'); // プロフィールページに遷移
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value); // 検索キーワードを更新
+    };
+
+    // 検索結果をフィルタリング
+    const filteredProducts = products.filter((product) =>
+        product.includes(searchTerm) // 検索キーワードが含まれているかチェック
+    );
+
     return (
         <div style={styles.container}>
             <header style={styles.header}>
                 <div style={styles.icon}>🏠</div>
-                <input style={styles.search} type="text" placeholder="検索" />
-                <div style={styles.profileIcon}>👤</div>
+                <input
+                    style={styles.search}
+                    type="text"
+                    placeholder="検索"
+                    value={searchTerm}
+                    onChange={handleSearchChange} // 入力が変わったときに呼び出す
+                />
+                <div style={styles.profileIcon} onClick={handleProfileClick}>
+                    👤
+                </div>
                 <button style={styles.uploadButton}>出品</button>
             </header>
 
@@ -24,8 +52,8 @@ export default function Home() {
             <section style={styles.products}>
                 <h2>商品</h2>
                 <div style={styles.productGrid}>
-                    {Array(8).fill(null).map((_, index) => (
-                        <div key={index} style={styles.productBox}></div>
+                    {filteredProducts.map((product, index) => (
+                        <div key={index} style={styles.productBox}>{product}</div> // 検索結果を表示
                     ))}
                 </div>
             </section>
@@ -56,7 +84,8 @@ const styles = {
     },
     // 人間アイコン
     profileIcon: {
-        fontSize: '70px',
+        fontSize: '100px',
+        cursor: 'pointer', // クリック可能にする
     },
     // 出品ボタン
     uploadButton: {
@@ -95,5 +124,8 @@ const styles = {
         width: '400px',
         height: '300px',
         backgroundColor: '#d3d3d3',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 };
