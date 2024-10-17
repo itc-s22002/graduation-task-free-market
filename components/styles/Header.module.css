@@ -1,0 +1,24 @@
+.header{
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+}
+
+.icon{
+      padding: 1vw;
+      margin: 10px;
+}
+
+.search{
+      padding: 8px;
+      width: 400px;
+}
+.uploadButton {
+      background-color: #ff5c5c;
+      color: white;
+      padding: 15px 50px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      margin-left: auto;
+}
