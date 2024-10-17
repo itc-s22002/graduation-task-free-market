@@ -10,6 +10,7 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
+    padding: 10px 20px;
   }
 
   .imageBox {
@@ -78,10 +79,11 @@
     align-items: center;
     justify-content: center;
     margin-top: 20px;
+    
   }
   
   .imageInput {
-    margin: 10px 0;
+    margin: 10px 30px;
   }
   
   .imageContainer {

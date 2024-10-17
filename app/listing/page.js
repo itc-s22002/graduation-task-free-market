@@ -2,11 +2,22 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/Listing.module.css";
+import { useRouter } from 'next/navigation';
 
-import { collection, addDoc, getFirestore, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getFirestore,
+  serverTimestamp,
+} from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 
-import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadString,
+  getDownloadURL,
+} from "firebase/storage";
 
 import LoginModal from "@/components/loginModal";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -16,6 +27,9 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 
 const ListingForm = () => {
+
+  const router = useRouter();
+
   const [productName, setProductName] = useState(""); //商品名
   const [productDetails, setProductDetails] = useState(""); //商品の詳細
   const [category, setCategory] = useState("ファッション"); //カテゴリー
@@ -183,123 +197,125 @@ const ListingForm = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <button className={styles.backButton}>&lt;</button>
-      {user ? (
-        <div>
-          {/* <p>{user.email}</p>
+    <>
+      <button className={styles.backButton} onClick={() => router.push('/')}>&lt;</button>
+      <div className={styles.container}>
+        {user ? (
+          <div>
+            {/* <p>{user.email}</p>
           <button onClick={() => auth.signOut()}>ログアウト</button> */}
-        </div>
-      ) : (
-        <div>
-          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
-        </div>
-      )}
-      <div className={styles.containerUpImage}>
-        <input
-          type="file"
-          onChange={handleImageChange}
-          accept="image/*"
-          className={styles.imageInput}
-        />
-        {selectedImage && (
-          <>
-            <div ref={imageContainerRef} className={styles.imageContainer}>
-              <img src={selectedImage} alt="Selected" />
-            </div>
-            <div className={styles.controls}>
-              <div className={styles.controlGroup}>
-                <label>トリミングサイズ:</label>
-                <input
-                  type="range"
-                  min="75"
-                  max="1500"
-                  value={cropSize}
-                  onChange={(e) => setCropSize(parseInt(e.target.value))}
-                  className={styles.rangeInput}
-                />
-                <span>{cropSize}px</span>
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
+        <div className={styles.containerUpImage}>
+          <input
+            type="file"
+            onChange={handleImageChange}
+            accept="image/*"
+            className={styles.imageInput}
+          />
+          {selectedImage && (
+            <>
+              <div ref={imageContainerRef} className={styles.imageContainer}>
+                <img src={selectedImage} alt="Selected" />
               </div>
-            </div>
-            <button className={styles.uploadButton} onClick={cropImage}>
-              トリミング
-            </button>
-          </>
-        )}
-        {croppedImage && (
-          <>
-            <h3>トリミング後の画像</h3>
-            <img
-              src={croppedImage}
-              alt="Cropped"
-              className={styles.croppedImage}
+              <div className={styles.controls}>
+                <div className={styles.controlGroup}>
+                  <label>トリミングサイズ:</label>
+                  <input
+                    type="range"
+                    min="75"
+                    max="1500"
+                    value={cropSize}
+                    onChange={(e) => setCropSize(parseInt(e.target.value))}
+                    className={styles.rangeInput}
+                  />
+                  <span>{cropSize}px</span>
+                </div>
+              </div>
+              <button className={styles.uploadButton} onClick={cropImage}>
+                トリミング
+              </button>
+            </>
+          )}
+          {croppedImage && (
+            <>
+              <h3>トリミング後の画像</h3>
+              <img
+                src={croppedImage}
+                alt="Cropped"
+                className={styles.croppedImage}
+              />
+            </>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <label>商品名と詳細</label>
+            <input
+              type="text"
+              placeholder="商品名"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              className={styles.input}
             />
-          </>
-        )}
+            <textarea
+              placeholder="商品詳細"
+              value={productDetails}
+              onChange={(e) => setProductDetails(e.target.value)}
+              className={styles.textarea}
+            />
+          </div>
+
+          <button type="submit" className={styles.submitButton}>
+            出品
+          </button>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="dropdown">カテゴリー</label>
+            <select
+              id="dropdown"
+              value={category}
+              onChange={handleCategory}
+              className={styles.input}
+            >
+              {categoryselect.map((val, index) => (
+                <option key={index} value={val.name}>
+                  {val.name}
+                </option>
+              ))}
+            </select>
+            <p>選択された値: {category}</p>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label>出品金額</label>
+            <input
+              type="text"
+              placeholder="出品金額記入"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={styles.input}
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label>受取受取方法</label>
+            <input
+              type="text"
+              placeholder="受取場所"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={styles.input}
+            />
+          </div>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.inputGroup}>
-          <label>商品名と詳細</label>
-          <input
-            type="text"
-            placeholder="商品名"
-            value={productName}
-            onChange={(e) => setProductName(e.target.value)}
-            className={styles.input}
-          />
-          <textarea
-            placeholder="商品詳細"
-            value={productDetails}
-            onChange={(e) => setProductDetails(e.target.value)}
-            className={styles.textarea}
-          />
-        </div>
-
-        <button type="submit" className={styles.submitButton}>
-          出品
-        </button>
-
-        <div className={styles.inputGroup}>
-          <label htmlFor="dropdown">カテゴリー</label>
-          <select
-            id="dropdown"
-            value={category}
-            onChange={handleCategory}
-            className={styles.input}
-          >
-            {categoryselect.map((val, index) => (
-              <option key={index} value={val.name}>
-                {val.name}
-              </option>
-            ))}
-          </select>
-          <p>選択された値: {category}</p>
-        </div>
-
-        <div className={styles.inputGroup}>
-          <label>出品金額</label>
-          <input
-            type="text"
-            placeholder="出品金額記入"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className={styles.input}
-          />
-        </div>
-
-        <div className={styles.inputGroup}>
-          <label>受取受取方法</label>
-          <input
-            type="text"
-            placeholder="受取場所"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className={styles.input}
-          />
-        </div>
-      </form>
-    </div>
+    </>
   );
 };
 export default ListingForm;
