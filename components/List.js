@@ -6,6 +6,7 @@ import {
   where,
   getDocs,
   getFirestore,
+  limit
 } from "firebase/firestore";
 import { app } from "../firebaseConfig";
 import React, { useState, useEffect } from "react";
@@ -13,19 +14,19 @@ import styles from "./styles/List.module.css";
 
 const db = getFirestore(app);
 
-const List = () => {
+const List = (category) => {
   const [merchandises, setMerchandise] = useState(null);
   useEffect(() => {
-    getMerchandiseList();
+    getMerchandiseCategoryList();
   }, []);
 
-  const getMerchandiseList = async () => {
-    const category = "ホビー・本";
-    const q = query(
-      collection(db, "Produts"),
-      where("category", "==", category)
-    );
-
+  const getMerchandiseCategoryList = async () => {
+    let q = query(collection(db, "Produts"),limit(8));
+    console.log(category)
+    if (category.category){
+        q = query(collection(db, "Produts"),where("category", "==", category.category));
+    }
+      
     try {
       const querySnapshot = await getDocs(q);
       const merchandise = querySnapshot.docs.map((doc) => ({
@@ -49,7 +50,8 @@ const List = () => {
               <div key={merchandise.id} className={styles.merchandiseCard}>
                 <img src={merchandise.image} alt="Uploaded" width={130} />
                 <p>{merchandise.productName}</p>
-                <p>{merchandise.productDetails}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
               </div>
             ))}
           </div>
