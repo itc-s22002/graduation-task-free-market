@@ -1,0 +1,114 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #e3e8ee;
+}
+
+.homeIcon, .profileIcon {
+    font-size: 24px;
+}
+
+.searchBar {
+    width: 50%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.sellButton {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.productPhoto {
+    width: 200px;
+    height: 200px;
+    background-color: #dcdcdc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #666;
+}
+
+.productDetails {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.productName {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.productInfo {
+    background-color: #dcdcdc;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.purchaseButton {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.payment {
+    margin-bottom: 20px;
+}
+
+.paymentLabel {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.paymentAmount {
+    background-color: #dcdcdc;
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.pickup {
+    margin-bottom: 20px;
+}
+
+.pickupLabel {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.pickupPlace {
+    background-color: #dcdcdc;
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.sellerInfo {
+    background-color: #dcdcdc;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
