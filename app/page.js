@@ -62,8 +62,7 @@ export default function Home() {
                 </div>
             </section>
         </div>
-    );
-}
+      </section>
 
 const styles = {
     container: {
