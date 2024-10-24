@@ -1,7 +1,8 @@
-"use client"; // このコンポーネントがクライアントコンポーネントであることを示す
+"use client"; // クライアントサイドで動作することを明示
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // useRouterをnext/navigationからインポート
+import { useRouter } from 'next/navigation'; // useRouterフックをnext/navigationからインポート
+import Link from 'next/link'; // Linkコンポーネントをインポート
 
 export default function Home() {
     const router = useRouter(); // useRouterフックを使用
@@ -41,10 +42,13 @@ export default function Home() {
             <section style={styles.popularCategory}>
                 <h2>人気カテゴリー</h2>
                 <div style={styles.circleContainer}>
-                    {["人気 1", "人気 2", "人気 3", "人気 4", "人気 5"].map((item, index) => (
-                        <div key={index} style={styles.circle}>
-                            {item}
-                        </div>
+                    {["category1", "category2", "category3", "category4", "category5"].map((category, index) => (
+                        <Link href={`/category/page.js`} key={index}>
+                            <div style={styles.circle}>
+                                {`人気 ${index + 1}`}
+                            </div><Link href={`/category/page.js`}></Link>
+
+                        </Link>
                     ))}
                 </div>
             </section>
@@ -70,33 +74,31 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '20px',
+        marginBottom: '30px',
     },
-    // 家のアイコン
     icon: {
-        fontSize: '100px',
+        fontSize: '150px',
     },
-    // 検索
     search: {
-        padding: '8px',
-        width: '400px',
+        padding: '20px',
+        width: '500px',
+        fontSize: '30px',
     },
-    // 人間アイコン
     profileIcon: {
-        fontSize: '100px',
+        fontSize: '150px',
         cursor: 'pointer', // クリック可能にする
     },
-    // 出品ボタン
     uploadButton: {
         backgroundColor: '#ff5c5c',
         color: 'white',
-        padding: '25px 50px',
+        padding: '50px 200px',
         border: 'none',
-        borderRadius: '15px',
+        borderRadius: '50px',
         cursor: 'pointer',
+        fontSize: '30px',
     },
     popularCategory: {
-        marginBottom: '20px',
+        marginBottom: '50px',
     },
     circleContainer: {
         display: 'flex',
@@ -110,6 +112,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        cursor: 'pointer',
     },
     products: {
         marginBottom: '20px',
