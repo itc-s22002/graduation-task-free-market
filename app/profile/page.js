@@ -1,59 +1,71 @@
-"use client";
+"use client"; // クライアントコンポーネントとして指定
 
-import React, { useState, useEffect } from 'react'; // useStateをインポート
-import { useRouter } from 'next/navigation'; // useRouterをnext/navigationからインポート
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
+import { app } from "../../firebaseConfig";
+
+const db = getFirestore(app);
 
 export default function Profile() {
-    const router = useRouter(); // useRouter フックを使う
-    const [name, setName] = useState(''); // 名前の状態
-    const [studentId, setStudentId] = useState(''); // 学籍番号の状態
-    const [school, setSchool] = useState(''); // 所属校の状態
-    // const [profileInfo, setProfileInfo] = useState(null); // プロフィール情報を保持する状態
-
-    const handleHomeClick = () => {
-        router.push('/'); // ホームに戻る
-    };
-
+    const router = useRouter();
     const [profileInfo, setProfileInfo] = useState({
         name: '',
         studentId: '',
-        school: ''
+        school: '',
     });
+    const [isSaved, setIsSaved] = useState(false); // 保存成功フラグ
 
-    // コンポーネントがマウントされた時にlocalStorageからデータを読み込む
+    // プロフィール情報の取得
     useEffect(() => {
-        const savedProfile = localStorage.getItem('profileInfo');
-        if (savedProfile) {
-            setProfileInfo(JSON.parse(savedProfile));
-        }
+        const fetchProfile = async () => {
+            const docRef = doc(db, 'users', '1'); // user_id 1 のデータを取得
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setProfileInfo({
+                    name: data.name || '',
+                    studentId: data.student_id || '',
+                    school: data.school || '',
+                });
+            } else {
+                console.log('No such document!');
+            }
+        };
+
+        fetchProfile();
     }, []);
 
-    const handleSave = () => {
-
-        localStorage.setItem('profileInfo', JSON.stringify(profileInfo));
-
-        // 入力内容をコンソールに出力
-        console.log('名前:', name);
-        console.log('学籍番号:', studentId);
-        console.log('所属校:', school);
-
-        setProfileInfo({ name, studentId, school });
-
-        // 実際の保存処理はここに追加できます（例: Firebaseへの保存）
-
-        // 入力をリセット
-        setName('');
-        setStudentId('');
-        setSchool('');
+    // フォームの入力を変更したときの処理
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProfileInfo(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
     };
 
-    useEffect(() => {
-        const savedProfile = localStorage.getItem('profileInfo');
-        if (savedProfile) {
-            setProfileInfo(JSON.parse(savedProfile));
+    // 保存ボタンがクリックされたときの処理
+    const handleSave = async () => {
+        try {
+            const docRef = doc(db, 'users', '1'); // user_id 1 のデータを保存
+            await setDoc(docRef, {
+                name: profileInfo.name,
+                student_id: profileInfo.studentId,
+                school: profileInfo.school,
+            }, { merge: true });
+            alert('プロフィールが保存されました！');
+            setIsSaved(true); // 保存成功フラグを更新
+        } catch (error) {
+            console.error('Error updating document: ', error);
+            alert('プロフィールの保存に失敗しました。');
         }
-    }, []);
+    };
 
+    const handleHomeClick = () => {
+        router.push('/');
+    };
 
     return (
         <div style={styles.container}>
@@ -61,64 +73,55 @@ export default function Profile() {
                 <div style={styles.icon} onClick={handleHomeClick}>
                     👤
                 </div>
-                {/*<h1 style={styles.title}>プロフィール</h1>*/}
-                <h1 style={styles.title}>
-                    プロフィール(PROFILE)
-                    {profileInfo && (
-                        <span style={styles.profileDetails}>
-                            <>
-                            <br /> {/* 改行を追加 */}
-                            </>
-                            名前: {profileInfo.name} 学籍番号: {profileInfo.studentId} 所属校: {profileInfo.school}
-        </span>
-                    )}
-                </h1>
-
+                <h1 style={styles.title}>プロフィール(PROFILE)</h1>
+                {isSaved && ( // 保存後に名前、学籍番号、所属校を表示
+                    <div style={styles.profileDetails}>
+                        <span style={styles.profileName}>{profileInfo.name}</span>
+                        <span style={styles.profileSchool}>{profileInfo.school}</span>
+                        <span style={styles.profileStudentId}>{profileInfo.studentId}</span>
+                    </div>
+                )}
             </header>
 
             <section style={styles.profileSection}>
                 <div style={styles.inputGroup}>
                     <label style={styles.label}>名前</label>
-                    <input style={styles.input}
-                           type="text"
-                           placeholder="名前を入力"
-                           value={name} // 状態をバインド
-                           onChange={(e) => setName(e.target.value)} // 入力内容を状態に保存
+                    <input
+                        style={styles.input}
+                        type="text"
+                        name="name"
+                        placeholder="名前を入力"
+                        value={profileInfo.name}
+                        onChange={handleChange}
                     />
                 </div>
                 <div style={styles.inputGroup}>
                     <label style={styles.label}>学籍番号</label>
-                    <input style={styles.input}
-                           type="text"
-                           placeholder="学籍番号を入力"
-                           value={studentId} // 状態をバインド
-                           onChange={(e) => setStudentId(e.target.value)} // 入力内容を状態に保存
+                    <input
+                        style={styles.input}
+                        type="text"
+                        name="studentId"
+                        placeholder="学籍番号を入力"
+                        value={profileInfo.studentId}
+                        onChange={handleChange}
                     />
                 </div>
                 <div style={styles.inputGroup}>
                     <label style={styles.label}>所属校</label>
-                    <input style={styles.input}
-                           type="text"
-                           placeholder="所属校を入力"
-                           value={school} // 状態をバインド
-                           onChange={(e) => setSchool(e.target.value)} // 入力内容を状態に保存
+                    <input
+                        style={styles.input}
+                        type="text"
+                        name="school"
+                        placeholder="所属校を入力"
+                        value={profileInfo.school}
+                        onChange={handleChange}
                     />
                 </div>
-                <button style={styles.saveButton} onClick={handleSave}>保存</button> {/* 保存ボタン */}
-
             </section>
 
-            <section style={styles.productsSection}>
-                <h2>商品</h2>
-                <div style={styles.productGrid}>
-                    {Array(6).fill(null).map((_, index) => (
-                        <div key={index} style={styles.productBox}></div>
-                    ))}
-                </div>
-
-                <button onClick={handleSave} style={styles.saveButton}>保存</button>
-
-            </section>
+            <button style={styles.saveButton} onClick={handleSave}>
+                保存
+            </button>
         </div>
     );
 }
@@ -135,16 +138,31 @@ const styles = {
         alignItems: 'center',
         marginBottom: '20px',
     },
-    // 家のアイコン
     icon: {
-        fontSize: '200px',
+        fontSize: '80px',
         marginRight: '20px',
         cursor: 'pointer',
     },
-    // プロフィールタイトル
     title: {
         fontSize: '32px',
         fontWeight: 'bold',
+    },
+    profileDetails: {
+        display: 'flex',
+        flexDirection: 'column', // 縦に並べる
+        marginLeft: '20px', // アイコンとのスペース
+    },
+    profileName: {
+        fontSize: '24px',
+        color: '#333',
+    },
+    profileSchool: {
+        fontSize: '18px',
+        color: '#555',
+    },
+    profileStudentId: {
+        fontSize: '18px',
+        color: '#555',
     },
     profileSection: {
         marginBottom: '20px',
@@ -160,21 +178,17 @@ const styles = {
     input: {
         width: '100%',
         padding: '10px',
-        fontSize: '20px',
+        fontSize: '18px',
         borderRadius: '5px',
         border: '1px solid #ccc',
     },
-    productsSection: {
-        marginTop: '20px',
-    },
-    productGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '10px',
-    },
-    productBox: {
-        width: '250px',
-        height: '250px',
-        backgroundColor: '#d3d3d3',
+    saveButton: {
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        fontSize: '18px',
+        cursor: 'pointer',
     },
 };
