@@ -18,7 +18,7 @@ const Header = () => {
           />
         </div>
         <input className={styles.search} type="text" placeholder="検索" />
-        <div className={styles.icon}>
+        <div className={styles.icon} onClick={() => router.push('/profile')}>
           <Image
             src="/people.png" // publicフォルダ内の画像ファイルパス
             alt="サンプル画像"

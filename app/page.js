@@ -4,18 +4,33 @@ import React from "react";
 import styles from "./styles/Home.module.css"
 import Header from "@/components/header";
 import List from "@/components/List";
+import { useRouter } from 'next/navigation';
+
 
 const Home = () => {
+  const router = useRouter();
+
+  const categoryselect = [
+    { name: "ファッション" },
+    { name: "家電・デジタル機器" },
+    { name: "家具インテリア" },
+    { name: "ホビー・本" },
+    { name: "スポーツ・アウトドア" },
+    { name: "美容・健康" },
+    { name: "チケット・サービズ" },
+    { name: "その他" },
+  ];
+  
   return (
     <div className={styles.container}>
       <Header/>
       <section className={styles.popularCategory}>
         <h2>人気カテゴリー</h2>
         <div className={styles.circleContainer}>
-          {["人気 1", "人気 2", "人気 3", "人気 4", "人気 5"].map(
-            (item, index) => (
-              <div key={index} className={styles.circle}>
-                {item}
+          {categoryselect.map(
+            ({name}, index) => (
+              <div key={index} className={styles.circle} onClick={() => router.push(`/list?category=${name}`)}>
+                {name}
               </div>
             )
           )}

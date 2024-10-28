@@ -1,0 +1,65 @@
+.container {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: '#f0f8ff';
+}
+.header {
+    display: flex;
+    justify-content: tart;
+    align-items: cente;
+    margin-bottom: 20px;
+}
+
+.icon {
+    font-size: 80px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+.title {
+    font-size: 32px;
+    font-weight: bold,
+}
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px
+}
+.profile-name {
+    font-size: 24px;
+    color: #333;
+}
+.profileSchool {
+    font-size: 18px;
+    color: #555
+}
+.profileStudentId {
+    font-size: 18px;
+    color: #555,
+}
+.profileSection {
+    margin-bottom: 20px,
+}
+.inputGroup {
+    margin-bottom: 15px
+}
+.label {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 5px
+}
+.input {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.saveButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+}
