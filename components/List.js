@@ -18,7 +18,7 @@ const List = (category) => {
   const [merchandises, setMerchandise] = useState(null);
   useEffect(() => {
     getMerchandiseCategoryList();
-  }, []);
+  }, [category]);
 
   const getMerchandiseCategoryList = async () => {
     let q = query(collection(db, "Produts"),limit(8));
