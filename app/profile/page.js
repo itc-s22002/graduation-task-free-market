@@ -18,7 +18,6 @@ import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import LoginModal from "@/components/loginModal";
 
-
 const db = getFirestore(app);
 const auth = getAuth(app);
 
@@ -35,6 +34,8 @@ export default function Profile() {
   const [isData, setIsData] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
 
+  const [merchandises, setMerchandise] = useState(null);
+
   // ユーザー情報の取得
   useEffect(() => {
     let uid = "";
@@ -44,6 +45,7 @@ export default function Profile() {
         fetchProfile(uid);
         console.log(authUser);
         setUser(authUser);
+        getMerchandiseCategoryList(uid)
       } else {
         uid = null;
         console.log("not data");
@@ -78,6 +80,25 @@ export default function Profile() {
     };
     return () => unsubscribe();
   }, []);
+
+  const getMerchandiseCategoryList = async (uid) => {
+    const q = query(
+      collection(db, "Produts"),
+      where("seller_id", "==", uid)
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const merchandise = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(merchandise);
+      setMerchandise(merchandise);
+      return merchandise;
+    } catch (error) {
+      console.error("Error fetching merchandise:", error);
+    }
+  };
 
   //ログインモーダルの表示
   const openModal = () => {
@@ -166,15 +187,15 @@ export default function Profile() {
         />
       </div>
       {user ? (
-          <div>
-            {/* <p>{user.email}</p>
+        <div>
+          {/* <p>{user.email}</p>
           <button onClick={() => auth.signOut()}>ログアウト</button> */}
-          </div>
-        ) : (
-          <div>
-            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
-          </div>
-        )}
+        </div>
+      ) : (
+        <div>
+          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+        </div>
+      )}
       <section className={styles.profileSection}>
         <div className={styles.inputGroup}>
           <label className={styles.label}>名前</label>
@@ -214,6 +235,21 @@ export default function Profile() {
       <button className={styles.saveButton} onClick={handleSave}>
         保存
       </button>
+      <div>
+      <h3>商品一覧</h3>
+        {merchandises && (
+          <div className={styles.merchandiseList}>
+            {merchandises.map((merchandise) => (
+              <div key={merchandise.id} className={styles.merchandiseCard}>
+                <img src={merchandise.image} alt="Uploaded" width={130} />
+                <p>{merchandise.productName}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

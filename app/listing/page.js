@@ -158,7 +158,7 @@ const ListingForm = () => {
         statas: "販売中",
         create_at: serverTimestamp(),
         image: downloadURL,
-        seller_id: user.email,
+        seller_id: user.uid,
       });
 
       //入力を空にする
