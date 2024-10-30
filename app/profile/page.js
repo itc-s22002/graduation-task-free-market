@@ -10,11 +10,14 @@ import {
   query,
   collection,
   where,
+  addDoc,
 } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 import styles from "../styles/Profile.module.css";
 import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import LoginModal from "@/components/loginModal";
+
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -27,22 +30,29 @@ export default function Profile() {
     school: "",
   });
   const [isSaved, setIsSaved] = useState(false); // 保存成功フラグ
-  const [user, setUser] = useState(null); //ユーザー情報
-  // プロフィール情報の取得
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(""); //ユーザー情報
+  const [isData, setIsData] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
+
+  // ユーザー情報の取得
   useEffect(() => {
-    let userId = ""
+    let uid = "";
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-        if (authUser) {
-            userId = authUser.uid;
-            fetchProfile(userId);
-            console.log(authUser)
-        } else {
-            userId = null;
-        }
+      if (authUser) {
+        uid = authUser.uid;
+        fetchProfile(uid);
+        console.log(authUser);
+        setUser(authUser);
+      } else {
+        uid = null;
+        console.log("not data");
+        setIsModalOpen(true);
+      }
     });
 
-    const fetchProfile = async (userId) => {
-      const q = query(collection(db, "Users"), where("user_id", "==", userId));
+    const fetchProfile = async (uid) => {
+      const q = query(collection(db, "Users"), where("user_id", "==", uid));
       try {
         const querySnapshot = await getDocs(q);
         const merchandise = querySnapshot.docs.map((doc) => ({
@@ -56,7 +66,8 @@ export default function Profile() {
             studentId: data.student_id || "",
             school: data.school || "",
           });
-          setUser(merchandise[0].id)
+          setUserId(merchandise[0].id);
+          setIsData(true);
         } else {
           console.log("No such document!");
         }
@@ -68,6 +79,15 @@ export default function Profile() {
     return () => unsubscribe();
   }, []);
 
+  //ログインモーダルの表示
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  //ログインモーダルの非表示
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   // フォームの入力を変更したときの処理
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,19 +99,32 @@ export default function Profile() {
 
   // 保存ボタンがクリックされたときの処理
   const handleSave = async () => {
+    console.log(isData);
     try {
-      const docRef = doc(db, "Users", user); // user_id 1 のデータを保存
-      await setDoc(
-        docRef,
-        {
+      if (isData) {
+        const docRef = doc(db, "Users", userId); // user_id 1 のデータを保存
+        await setDoc(
+          docRef,
+          {
+            name: profileInfo.name,
+            student_id: profileInfo.studentId,
+            school: profileInfo.school,
+          },
+          { merge: true }
+        );
+        alert("プロフィールが保存されました！");
+        setIsSaved(true); // 保存成功フラグを更新
+      } else {
+        const docRef = await addDoc(collection(db, "Users"), {
           name: profileInfo.name,
           student_id: profileInfo.studentId,
           school: profileInfo.school,
-        },
-        { merge: true }
-      );
-      alert("プロフィールが保存されました！");
-      setIsSaved(true); // 保存成功フラグを更新
+          user_id: user.uid,
+          email: user.email,
+        });
+        alert("プロフィールが保存されました！");
+        setIsSaved(true); // 保存成功フラグを更新
+      }
     } catch (error) {
       console.error("Error updating document: ", error);
       alert("プロフィールの保存に失敗しました。");
@@ -124,7 +157,24 @@ export default function Profile() {
           </div>
         )}
       </header>
-
+      <div className={styles.icon2} onClick={() => router.back("/")}>
+        <Image
+          src="/back.png" // publicフォルダ内の画像ファイルパス
+          alt="サンプル画像"
+          width={25} // 必須: 画像の幅を指定
+          height={25} // 必須: 画像の高さを指定
+        />
+      </div>
+      {user ? (
+          <div>
+            {/* <p>{user.email}</p>
+          <button onClick={() => auth.signOut()}>ログアウト</button> */}
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
       <section className={styles.profileSection}>
         <div className={styles.inputGroup}>
           <label className={styles.label}>名前</label>
