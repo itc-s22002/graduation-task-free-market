@@ -10,12 +10,14 @@ import {
   query,
   collection,
   where,
-  addDoc
+  addDoc,
 } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 import styles from "../styles/Profile.module.css";
 import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import LoginModal from "@/components/loginModal";
+
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -28,21 +30,24 @@ export default function Profile() {
     school: "",
   });
   const [isSaved, setIsSaved] = useState(false); // 保存成功フラグ
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(""); //ユーザー情報
   const [isData, setIsData] = useState(false);
-  // プロフィール情報の取得
+  const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
+
+  // ユーザー情報の取得
   useEffect(() => {
     let uid = "";
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         uid = authUser.uid;
         fetchProfile(uid);
-        console.log(authUser)
-        setUser(authUser)
+        console.log(authUser);
+        setUser(authUser);
       } else {
         uid = null;
         console.log("not data");
+        setIsModalOpen(true);
       }
     });
 
@@ -74,6 +79,15 @@ export default function Profile() {
     return () => unsubscribe();
   }, []);
 
+  //ログインモーダルの表示
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  //ログインモーダルの非表示
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   // フォームの入力を変更したときの処理
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,8 +120,7 @@ export default function Profile() {
           student_id: profileInfo.studentId,
           school: profileInfo.school,
           user_id: user.uid,
-          email:user.email,
-
+          email: user.email,
         });
         alert("プロフィールが保存されました！");
         setIsSaved(true); // 保存成功フラグを更新
@@ -144,7 +157,24 @@ export default function Profile() {
           </div>
         )}
       </header>
-
+      <div className={styles.icon2} onClick={() => router.back("/")}>
+        <Image
+          src="/back.png" // publicフォルダ内の画像ファイルパス
+          alt="サンプル画像"
+          width={25} // 必須: 画像の幅を指定
+          height={25} // 必須: 画像の高さを指定
+        />
+      </div>
+      {user ? (
+          <div>
+            {/* <p>{user.email}</p>
+          <button onClick={() => auth.signOut()}>ログアウト</button> */}
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
       <section className={styles.profileSection}>
         <div className={styles.inputGroup}>
           <label className={styles.label}>名前</label>

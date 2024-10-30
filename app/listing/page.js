@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/Listing.module.css";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 import {
   collection,
@@ -27,7 +27,6 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 
 const ListingForm = () => {
-
   const router = useRouter();
 
   const [productName, setProductName] = useState(""); //商品名
@@ -198,7 +197,14 @@ const ListingForm = () => {
 
   return (
     <>
-      <button className={styles.backButton} onClick={() => router.push('/')}>&lt;</button>
+      <div className={styles.icon2} onClick={() => router.back("/")}>
+        <img
+          src="/back.png" // publicフォルダ内の画像ファイルパス
+          alt="サンプル画像"
+          width={25} // 必須: 画像の幅を指定
+          height={25} // 必須: 画像の高さを指定
+        />
+      </div>
       <div className={styles.container}>
         {user ? (
           <div>
