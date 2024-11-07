@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/header";
-import styles from "../styles/Listing.module.css";
+import styles from "../styles/Purchase.module.css";
 import React, { useState, useEffect } from "react";
 import { app } from "../../firebaseConfig";
 import {
@@ -78,9 +78,9 @@ const Purchase = () => {
   }, []);
 
   return (
-    <>
-      <Header />
-      <div className={styles.container}>
+      <div className={styles.box}>
+        <Header />
+        <div className={styles.container}>
         {item && (
           <>
             <div className={styles.containerUpImage}>
@@ -99,13 +99,13 @@ const Purchase = () => {
                 <div className={styles.input}>{item.productName}</div>
                 <label>出品者</label>
                 <div className={styles.input}>
-                {seller && (
-                  <>
-                    <p>ニックネーム：{seller.name}</p>
-                  <p>学校：{seller.school}</p>
-                  <p>学籍番号：{seller.student_id}</p>
-                  </>
-                )}
+                  {seller && (
+                    <>
+                      <p>ニックネーム：{seller.name}</p>
+                      <p>学校：{seller.school}</p>
+                      <p>学籍番号：{seller.student_id}</p>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -117,8 +117,8 @@ const Purchase = () => {
             </div>
           </>
         )}
+        </div>
       </div>
-    </>
   );
 };
 
