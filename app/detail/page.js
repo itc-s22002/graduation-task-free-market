@@ -13,21 +13,20 @@ import {
   collection,
   where,
 } from "firebase/firestore";
-import Chat from "@/components/chat";
 import { useSearchParams } from "next/navigation";
 
 const db = getFirestore(app);
 
-const Purchase = () => {
+const Detail = () => {
   const searchParams = useSearchParams();
-  const Transactions = searchParams.get("t");
+  const Transactions = searchParams.get("m");
 
   const [item, setItem] = useState(null);
   const [transactions, getTransactions] = useState(null);
   const [seller, setSeller] = useState(null);
 
   const getImageData = async () => {
-    let transactionsPid = "30YzGX9VOwJTD76P2KSM";
+    let transactionsPid = Transactions;
     let sellerId = ""
     try {
       const produtsDocRef = doc(db, "Produts", transactionsPid);
@@ -113,4 +112,4 @@ const Purchase = () => {
   );
 };
 
-export default Purchase;
+export default Detail;
