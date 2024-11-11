@@ -12,30 +12,58 @@ import {
   getDocs,
   collection,
   where,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 
 const db = getFirestore(app);
+const auth = getAuth(app);
+
 
 const Detail = () => {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
-  const Transactions = searchParams.get("m");
+  const Produts = searchParams.get("m");
 
   const [item, setItem] = useState(null);
-  const [transactions, getTransactions] = useState(null);
+  const [transactions, setTransactions] = useState(null);
   const [seller, setSeller] = useState(null);
 
+  const [transactionsData, setTransactionsData] = useState(false);
+
+  const [user, setUser] = useState(null); //ユーザー情報
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ログインしている場合
+        setUser(user);
+      } else {
+        // ログインしていない場合
+        setUser(null);
+      }
+    });
+
+    // クリーンアップ
+    return () => unsubscribe();
+  }, []);
+
   const getImageData = async () => {
-    let transactionsPid = Transactions;
-    let sellerId = ""
+    let ProdutsId = Produts;
+    let sellerId = "";
     try {
-      const produtsDocRef = doc(db, "Produts", transactionsPid);
+      const produtsDocRef = doc(db, "Produts", ProdutsId);
       const produtsQuerySnapshot = await getDoc(produtsDocRef);
 
       if (produtsQuerySnapshot.exists()) {
         setItem(produtsQuerySnapshot.data());
-        sellerId = produtsQuerySnapshot.data().seller_id
-        console.log(produtsQuerySnapshot.data())
+        sellerId = produtsQuerySnapshot.data().seller_id;
+        console.log(produtsQuerySnapshot.data());
       } else {
         console.log("p data not found");
       }
@@ -54,8 +82,24 @@ const Detail = () => {
         ...doc.data(),
       }));
       setSeller(itemsArray[0]);
-      console.log(itemsArray[0]);
     } catch (error) {
+      console.error("Error fetching  data: ", error);
+    }
+    try {
+      const q = query(
+        collection(db, "Transactions"),
+        where("product_id", "==", ProdutsId)
+      );
+      const sellerQuerySnapshot = await getDocs(q);
+
+      const itemsArray = sellerQuerySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTransactions(itemsArray[0].id);
+      console.log(itemsArray[0].id);
+    } catch (error) {
+      setTransactionsData(true);
       console.error("Error fetching  data: ", error);
     }
   };
@@ -64,10 +108,51 @@ const Detail = () => {
     getImageData();
   }, []);
 
+  const addTransactions = async () => {
+    try {
+      //Firebaseにデータの送信
+      const docRef = addDoc(collection(db, "Transactions"), {
+        buyer_id: user.uid,
+        product_id: Produts,
+        seller_id: item.seller_id,
+        statas: "交渉中",
+        transaction_date: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
+    try {
+      const q = query(
+        collection(db, "Transactions"),
+        where("product_id", "==", Produts)
+      );
+      const sellerQuerySnapshot = await getDocs(q);
+
+      const itemsArray = sellerQuerySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(itemsArray[0].id);
+      router.push(`purchase?t=${itemsArray[0].id}`)
+    } catch (error) {
+      setTransactionsData(true);
+      console.error("Error fetching  data: ", error);
+    }
+  };
+
+  const onPurchase = () => {
+    if (transactionsData) {
+      addTransactions();
+    } else {
+      router.push(`/purchase?t=${transactions}`);
+    }
+  };
+
   return (
-      <div className={styles.box}>
-        <Header />
-        <div className={styles.container}>
+    <div className={styles.box}>
+      <Header />
+      <div className={styles.container}>
         {item && (
           <>
             <div className={styles.containerUpImage}>
@@ -87,7 +172,7 @@ const Detail = () => {
                 <label>商品詳細</label>
                 <div className={styles.input}>{item.productDetails}</div>
                 <label>支払い金額</label>
-                <div className={styles.input}>{item.price}</div>
+                <div className={styles.input}>{item.price}円</div>
                 <label>受取場所</label>
                 <div className={styles.input}>{item.location}</div>
                 <label>出品者</label>
@@ -101,14 +186,18 @@ const Detail = () => {
                   )}
                 </div>
               </div>
-              <button type="submit" className={styles.submitButton}>
-                出品
+              <button
+                type="submit"
+                className={styles.submitButton}
+                onClick={() => onPurchase()}
+              >
+                購入手続き
               </button>
             </div>
           </>
         )}
-        </div>
       </div>
+    </div>
   );
 };
 

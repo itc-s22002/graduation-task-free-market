@@ -23,12 +23,13 @@ const List = (category) => {
   }, [category]);
 
   const getMerchandiseCategoryList = async () => {
-    let q = query(collection(db, "Produts"), limit(8));
+    let q = query(collection(db, "Produts"),where("statas","==", "販売中"),limit(8));
     console.log(category);
     if (category.category) {
       q = query(
         collection(db, "Produts"),
-        where("category", "==", category.category)
+        where("category", "==", category.category),
+        where("statas","==", "販売中")
       );
     }
 

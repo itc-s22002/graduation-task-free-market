@@ -12,19 +12,26 @@ import {
   getDocs,
   collection,
   where,
+  updateDoc
 } from "firebase/firestore";
 import Chat from "@/components/chat";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+
 
 const db = getFirestore(app);
 
 const Purchase = () => {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const Transactions = searchParams.get("t");
 
   const [item, setItem] = useState(null);
-  const [transactions, getTransactions] = useState(null);
+  const [transactionsId, getTransactionsId] = useState(null);
   const [seller, setSeller] = useState(null);
+
+  const [produtsId, setProdutsId] = useState(null)
 
   const getImageData = async () => {
     let transactionsPid = "";
@@ -34,7 +41,7 @@ const Purchase = () => {
       const transactionsQuerySnapshot = await getDoc(transactionsDocRef);
 
       if (transactionsQuerySnapshot.exists()) {
-        getTransactions(transactionsQuerySnapshot.data());
+        getTransactionsId(transactionsQuerySnapshot.id);
         transactionsPid = transactionsQuerySnapshot.data().product_id;
         sellerId = transactionsQuerySnapshot.data().buyer_id;
       } else {
@@ -49,6 +56,8 @@ const Purchase = () => {
 
       if (produtsQuerySnapshot.exists()) {
         setItem(produtsQuerySnapshot.data());
+        setProdutsId(produtsQuerySnapshot.id);
+
       } else {
         console.log("p data not found");
       }
@@ -76,6 +85,27 @@ const Purchase = () => {
   useEffect(() => {
     getImageData();
   }, []);
+
+  const onPurchase = () => {
+    console.log(transactionsId)
+    try {
+      const docRef = updateDoc(doc(db, "Transactions",transactionsId), {
+        statas: "購入",
+      });
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
+    try {
+      const docRef = updateDoc(doc(db, "Produts",produtsId), {
+        statas: "購入",
+      });
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
+    router.push("/")
+  }
 
   return (
       <div className={styles.box}>
@@ -111,8 +141,8 @@ const Purchase = () => {
 
               <Chat />
 
-              <button type="submit" className={styles.submitButton}>
-                出品
+              <button type="submit" className={styles.submitButton} onClick = {() => onPurchase()}>
+                購入
               </button>
             </div>
           </>
