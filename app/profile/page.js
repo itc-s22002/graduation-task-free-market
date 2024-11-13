@@ -37,6 +37,8 @@ export default function Profile() {
   const [merchandises, setMerchandise] = useState(null);
   const [negotiatingMerchandises, setNegotiatingMerchandises] = useState(null)
   const [purchaseMerchandises, setPurchaseMerchandises] = useState(null)
+  const [purchaseTransactions, setPurchaseTransactions] = useState(null)
+
 
 
   // ユーザー情報の取得
@@ -51,6 +53,7 @@ export default function Profile() {
         getMerchandiseCategoryList(uid)
         getNegotiatingMerchandiseCategoryList(uid)
         getPurchaseMerchandiseCategoryList(uid)
+        getPurchaseTransactionsCategoryList(uid)
       } else {
         uid = null;
         console.log("not data");
@@ -98,7 +101,6 @@ export default function Profile() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setMerchandise(merchandise);
       return merchandise;
     } catch (error) {
@@ -119,7 +121,6 @@ export default function Profile() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setNegotiatingMerchandises(merchandise);
       return merchandise;
     } catch (error) {
@@ -127,6 +128,7 @@ export default function Profile() {
     }
   };
 
+  //購入された商品一覧
   const getPurchaseMerchandiseCategoryList = async (uid) => {
     const q = query(
       collection(db, "Produts"),
@@ -139,8 +141,28 @@ export default function Profile() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setPurchaseMerchandises(merchandise);
+      return merchandise;
+    } catch (error) {
+      console.error("Error fetching merchandise:", error);
+    }
+  }
+
+  //購入された商品一覧
+  const getPurchaseTransactionsCategoryList = async (uid) => {
+    const q = query(
+      collection(db, "Produts"),
+      where("buyer_id", "==", uid),
+      where("statas", "==", "購入"),
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const merchandise = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(merchandise);
+      setPurchaseTransactions(merchandise);
       return merchandise;
     } catch (error) {
       console.error("Error fetching merchandise:", error);
@@ -319,6 +341,21 @@ export default function Profile() {
         {purchaseMerchandises && (
           <div className={styles.merchandiseList}>
             {purchaseMerchandises.map((merchandise) => (
+              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
+                <img src={merchandise.image} alt="Uploaded" width={130} />
+                <p>{merchandise.productName}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+      <h3>購入した商品一覧</h3>
+        {purchaseTransactions && (
+          <div className={styles.merchandiseList}>
+            {purchaseTransactions.map((merchandise) => (
               <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
                 <img src={merchandise.image} alt="Uploaded" width={130} />
                 <p>{merchandise.productName}</p>

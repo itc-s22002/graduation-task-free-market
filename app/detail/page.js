@@ -14,15 +14,14 @@ import {
   where,
   addDoc,
   serverTimestamp,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-
+import LoginModal from "@/components/loginModal";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
-
 
 const Detail = () => {
   const router = useRouter();
@@ -33,11 +32,12 @@ const Detail = () => {
   const [item, setItem] = useState(null);
   const [transactions, setTransactions] = useState(null);
   const [seller, setSeller] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
+
 
   const [transactionsData, setTransactionsData] = useState(false);
 
   const [user, setUser] = useState(null); //ユーザー情報
-
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -47,6 +47,7 @@ const Detail = () => {
       } else {
         // ログインしていない場合
         setUser(null);
+        setIsModalOpen(true);
       }
     });
 
@@ -109,6 +110,16 @@ const Detail = () => {
     getImageData();
   }, []);
 
+  //ログインモーダルの表示
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  //ログインモーダルの非表示
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const addTransactions = async () => {
     try {
       //Firebaseにデータの送信
@@ -135,13 +146,13 @@ const Detail = () => {
         ...doc.data(),
       }));
       console.log(itemsArray[0].id);
-      router.push(`purchase?t=${itemsArray[0].id}`)
+      router.push(`purchase?t=${itemsArray[0].id}`);
     } catch (error) {
       setTransactionsData(true);
       console.error("Error fetching  data: ", error);
     }
     try {
-      const docRef = updateDoc(doc(db, "Produts",Produts), {
+      const docRef = updateDoc(doc(db, "Produts", Produts), {
         statas: "交渉中",
       });
     } catch (error) {
@@ -154,7 +165,7 @@ const Detail = () => {
       addTransactions();
     } else {
       try {
-        const docRef = updateDoc(doc(db, "Produts",Produts), {
+        const docRef = updateDoc(doc(db, "Produts", Produts), {
           statas: "交渉中",
         });
       } catch (error) {
@@ -167,6 +178,16 @@ const Detail = () => {
 
   return (
     <div className={styles.box}>
+      {user ? (
+          <div>
+            {/* <p>{user.email}</p>
+          <button onClick={() => auth.signOut()}>ログアウト</button> */}
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
       <Header />
       <div className={styles.container}>
         {item && (
@@ -202,13 +223,24 @@ const Detail = () => {
                   )}
                 </div>
               </div>
-              <button
-                type="submit"
-                className={styles.submitButton}
-                onClick={() => onPurchase()}
-              >
-                購入手続き
-              </button>
+              {user && (
+                <>
+                {item.statas == "購入" || item.seller_id == user.uid ? (
+                <>{item.statas}</>
+              ) : (
+                <>
+                <button
+                  type="submit"
+                  className={styles.submitButton}
+                  onClick={() => onPurchase()}
+                >
+                  購入手続き
+                </button>
+                </>
+              )}
+                </>
+
+              )}
             </div>
           </>
         )}
