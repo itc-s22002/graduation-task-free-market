@@ -100,6 +100,7 @@ const Purchase = () => {
       const docRef = updateDoc(doc(db, "Produts",produtsId), {
         statas: "購入",
       });
+      alert("購入");
     } catch (error) {
       console.error("アップロード中にエラーが発生しました:", error);
       alert("アップロードに失敗しました。");

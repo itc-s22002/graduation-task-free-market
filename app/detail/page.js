@@ -14,6 +14,7 @@ import {
   where,
   addDoc,
   serverTimestamp,
+  updateDoc
 } from "firebase/firestore";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -139,12 +140,27 @@ const Detail = () => {
       setTransactionsData(true);
       console.error("Error fetching  data: ", error);
     }
+    try {
+      const docRef = updateDoc(doc(db, "Produts",Produts), {
+        statas: "交渉中",
+      });
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
   };
-
   const onPurchase = () => {
     if (transactionsData) {
       addTransactions();
     } else {
+      try {
+        const docRef = updateDoc(doc(db, "Produts",Produts), {
+          statas: "交渉中",
+        });
+      } catch (error) {
+        console.error("アップロード中にエラーが発生しました:", error);
+        alert("アップロードに失敗しました。");
+      }
       router.push(`/purchase?t=${transactions}`);
     }
   };

@@ -12,24 +12,44 @@ import { app } from "../firebaseConfig";
 import React, { useState, useEffect } from "react";
 import styles from "./styles/List.module.css";
 import { useRouter } from "next/navigation";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 const List = (category) => {
   const router = useRouter();
+  const [userId, setUserId] = useState(""); //ユーザー情報
   const [merchandises, setMerchandise] = useState(null);
   useEffect(() => {
-    getMerchandiseCategoryList();
+    let uid = null
+    onAuthStateChanged(auth, (authUser) => {
+      if (authUser) {
+        uid = authUser.uid;
+        setUserId(uid);
+        getMerchandiseCategoryList(uid);
+      } else {
+        uid = null;
+        getMerchandiseCategoryList(uid)
+        console.log("not data");
+      }
+    });
   }, [category]);
 
-  const getMerchandiseCategoryList = async () => {
-    let q = query(collection(db, "Produts"),where("statas","==", "販売中"),limit(8));
-    console.log(category);
+  const getMerchandiseCategoryList = async (uid) => {
+    console.log(uid)
+    let q = query(
+      collection(db, "Produts"),
+      where("statas", "==", "販売中"),
+      where("seller_id", "!=", uid),
+      limit(8)
+    );
     if (category.category) {
       q = query(
         collection(db, "Produts"),
         where("category", "==", category.category),
-        where("statas","==", "販売中")
+        where("statas", "==", "販売中"),
+        where("seller_id", "!=", uid)
       );
     }
 
@@ -47,6 +67,7 @@ const List = (category) => {
     }
   };
 
+
   return (
     <>
       <div>
@@ -56,7 +77,7 @@ const List = (category) => {
               <div
                 key={merchandise.id}
                 className={styles.merchandiseCard}
-                onClick = {() => router.push(`/detail?m=${merchandise.id}`)}
+                onClick={() => router.push(`/detail?m=${merchandise.id}`)}
               >
                 <img src={merchandise.image} alt="Uploaded" width={130} />
                 <p>{merchandise.productName}</p>

@@ -35,6 +35,9 @@ export default function Profile() {
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
 
   const [merchandises, setMerchandise] = useState(null);
+  const [negotiatingMerchandises, setNegotiatingMerchandises] = useState(null)
+  const [purchaseMerchandises, setPurchaseMerchandises] = useState(null)
+
 
   // ユーザー情報の取得
   useEffect(() => {
@@ -46,6 +49,8 @@ export default function Profile() {
         console.log(authUser);
         setUser(authUser);
         getMerchandiseCategoryList(uid)
+        getNegotiatingMerchandiseCategoryList(uid)
+        getPurchaseMerchandiseCategoryList(uid)
       } else {
         uid = null;
         console.log("not data");
@@ -81,6 +86,7 @@ export default function Profile() {
     return () => unsubscribe();
   }, []);
 
+  //出品した商品一覧
   const getMerchandiseCategoryList = async (uid) => {
     const q = query(
       collection(db, "Produts"),
@@ -99,6 +105,49 @@ export default function Profile() {
       console.error("Error fetching merchandise:", error);
     }
   };
+
+  //交渉中の商品一覧
+  const getNegotiatingMerchandiseCategoryList = async (uid) => {
+    const q = query(
+      collection(db, "Produts"),
+      where("seller_id", "==", uid),
+      where("statas", "==", "交渉中"),
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const merchandise = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(merchandise);
+      setNegotiatingMerchandises(merchandise);
+      return merchandise;
+    } catch (error) {
+      console.error("Error fetching merchandise:", error);
+    }
+  };
+
+  const getPurchaseMerchandiseCategoryList = async (uid) => {
+    const q = query(
+      collection(db, "Produts"),
+      where("seller_id", "==", uid),
+      where("statas", "==", "購入"),
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const merchandise = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(merchandise);
+      setPurchaseMerchandises(merchandise);
+      return merchandise;
+    } catch (error) {
+      console.error("Error fetching merchandise:", error);
+    }
+  }
+
+  
 
   //ログインモーダルの表示
   const openModal = () => {
@@ -240,7 +289,37 @@ export default function Profile() {
         {merchandises && (
           <div className={styles.merchandiseList}>
             {merchandises.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard}>
+              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
+                <img src={merchandise.image} alt="Uploaded" width={130} />
+                <p>{merchandise.productName}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+      <h3>交渉中の商品一覧</h3>
+        {negotiatingMerchandises && (
+          <div className={styles.merchandiseList}>
+            {negotiatingMerchandises.map((merchandise) => (
+              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
+                <img src={merchandise.image} alt="Uploaded" width={130} />
+                <p>{merchandise.productName}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+      <h3>購入されたの商品一覧</h3>
+        {purchaseMerchandises && (
+          <div className={styles.merchandiseList}>
+            {purchaseMerchandises.map((merchandise) => (
+              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
                 <img src={merchandise.image} alt="Uploaded" width={130} />
                 <p>{merchandise.productName}</p>
                 <p>{merchandise.price}円</p>   
