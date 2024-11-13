@@ -12,14 +12,18 @@ import {
   getDocs,
   collection,
   where,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import Chat from "@/components/chat";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-
+import {
+  getAuth,
+  onAuthStateChanged,
+} from "firebase/auth";
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const Purchase = () => {
   const router = useRouter();
@@ -31,7 +35,10 @@ const Purchase = () => {
   const [transactionsId, getTransactionsId] = useState(null);
   const [seller, setSeller] = useState(null);
 
-  const [produtsId, setProdutsId] = useState(null)
+  const [produtsId, setProdutsId] = useState(null);
+
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(""); //ユーザー情報
 
   const getImageData = async () => {
     let transactionsPid = "";
@@ -57,7 +64,6 @@ const Purchase = () => {
       if (produtsQuerySnapshot.exists()) {
         setItem(produtsQuerySnapshot.data());
         setProdutsId(produtsQuerySnapshot.id);
-
       } else {
         console.log("p data not found");
       }
@@ -86,10 +92,25 @@ const Purchase = () => {
     getImageData();
   }, []);
 
-  const onPurchase = () => {
-    console.log(transactionsId)
+  useEffect(() => {
+    let uid = "";
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      if (authUser) {
+        uid = authUser.uid;
+        console.log(authUser);
+        setUser(authUser);
+      } else {
+        uid = null;
+        console.log("not data");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const onPurchase = (u) => {
+    console.log(transactionsId);
     try {
-      const docRef = updateDoc(doc(db, "Transactions",transactionsId), {
+      const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "購入",
       });
     } catch (error) {
@@ -97,21 +118,44 @@ const Purchase = () => {
       alert("アップロードに失敗しました。");
     }
     try {
-      const docRef = updateDoc(doc(db, "Produts",produtsId), {
+      const docRef = updateDoc(doc(db, "Produts", produtsId), {
         statas: "購入",
+        buyer_id: u,
       });
       alert("購入");
     } catch (error) {
       console.error("アップロード中にエラーが発生しました:", error);
       alert("アップロードに失敗しました。");
     }
-    router.push("/")
-  }
+    router.push("/");
+  };
+
+  const NegotiationButton = (i,u) => {
+
+    if (item.statas  == "交渉中" && item.seller_id != user.uid) {
+      return (
+        <>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            onClick={() => onPurchase(user.uid)}
+          >
+            購入
+          </button>
+        </>
+      );
+    } else {
+      return (
+        <>
+        </>
+      );
+    }
+  };
 
   return (
-      <div className={styles.box}>
-        <Header />
-        <div className={styles.container}>
+    <div className={styles.box}>
+      <Header />
+      <div className={styles.container}>
         {item && (
           <>
             <div className={styles.containerUpImage}>
@@ -141,15 +185,14 @@ const Purchase = () => {
               </div>
 
               <Chat />
-
-              <button type="submit" className={styles.submitButton} onClick = {() => onPurchase()}>
-                購入
-              </button>
+              {user && (
+                <NegotiationButton i = {item} u = {user}/>
+              )}
             </div>
           </>
         )}
-        </div>
       </div>
+    </div>
   );
 };
 

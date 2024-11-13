@@ -225,8 +225,8 @@ const Detail = () => {
               </div>
               {user && (
                 <>
-                {item.statas == "購入" || item.seller_id == user.uid ? (
-                <>{item.statas}</>
+                {item.statas == "購入" && item.seller_id == user.uid ? (
+                <></>
               ) : (
                 <>
                 <button
@@ -234,7 +234,7 @@ const Detail = () => {
                   className={styles.submitButton}
                   onClick={() => onPurchase()}
                 >
-                  購入手続き
+                  購入交渉
                 </button>
                 </>
               )}
