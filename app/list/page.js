@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import styles from "../styles/Home.module.css";
 
 
-
+//カテゴリー一覧
 const Lists = () => {
     const searchParams = useSearchParams()
     const category = searchParams.get('category')

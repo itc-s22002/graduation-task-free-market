@@ -12,11 +12,13 @@ import {
 } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 
+
 import {
   getStorage,
   ref,
   uploadString,
   getDownloadURL,
+  uploadBytes,
 } from "firebase/storage";
 
 import LoginModal from "@/components/loginModal";
@@ -26,6 +28,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 
+//出品
 const ListingForm = () => {
   const router = useRouter();
 
@@ -42,8 +45,11 @@ const ListingForm = () => {
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [croppedImage, setCroppedImage] = useState(null);
+  const [confirmationImage, setConfirmation] = useState(null)
+
   const [cropSize, setCropSize] = useState(300);
   const imageContainerRef = useRef(null); // 画像コンテナの参照を保持する
+  const cropperRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -90,32 +96,35 @@ const ListingForm = () => {
     image.src = selectedImage;
 
     image.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = cropSize;
-      canvas.height = cropSize;
-      const ctx = canvas.getContext("2d");
+        const canvas = document.createElement("canvas");
+        canvas.width = cropSize;
+        canvas.height = cropSize;
+        const ctx = canvas.getContext("2d");
 
-      const scrollX = imageContainerRef.current.scrollLeft; // X軸のスクロール位置
-      const scrollY = imageContainerRef.current.scrollTop; // Y軸のスクロール位置
+        const scrollX = imageContainerRef.current.scrollLeft; // X軸のスクロール位置
+        const scrollY = imageContainerRef.current.scrollTop; // Y軸のスクロール位置
 
-      // スクロール位置を基にトリミングする
-      ctx.drawImage(
-        image,
-        scrollX, // スクロールした位置をX軸の開始位置にする
-        scrollY, // スクロールした位置をY軸の開始位置にする
-        cropSize, // 切り取りサイズ
-        cropSize,
-        0,
-        0,
-        cropSize,
-        cropSize
-      );
+        ctx.drawImage(
+            image,
+            scrollX, // スクロールした位置をX軸の開始位置にする
+            scrollY, // スクロールした位置をY軸の開始位置にする
+            cropSize, // 切り取りサイズ
+            cropSize,
+            0,
+            0,
+            cropSize,
+            cropSize
+        );
 
-      const croppedImageUrl = canvas.toDataURL("image/jpeg");
+        // EXIF データを削除するために Blob に変換
+        canvas.toBlob((blob) => {
+            setCroppedImage(blob); // Blobをセット
+        }, "image/jpeg");
+        const croppedImageUrl = canvas.toDataURL("image/jpeg");
+        setConfirmation(croppedImageUrl);
 
-      setCroppedImage(croppedImageUrl);
     };
-  };
+};
 
   useEffect(() => {
     cropImage();
@@ -135,9 +144,10 @@ const ListingForm = () => {
     });
 
     if (!croppedImage) return;
+  
 
     const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-    await uploadString(storageRef, croppedImage, "data_url");
+    await uploadBytes(storageRef, croppedImage);
 
     // アップロード後にダウンロードURLを取得
     const downloadURL = await getDownloadURL(storageRef);
@@ -146,7 +156,7 @@ const ListingForm = () => {
       alert("入力されていない項目があります");
       return;
     }
-
+    setLoading(true)
     try {
       //Firebaseにデータの送信
       const docRef = await addDoc(collection(db, "Produts"), {
@@ -160,6 +170,8 @@ const ListingForm = () => {
         image: downloadURL,
         seller_id: user.uid,
       });
+      setLoading(false)
+
 
       //入力を空にする
       alert("データがアップロードされました");
@@ -247,11 +259,11 @@ const ListingForm = () => {
               </button>
             </>
           )}
-          {croppedImage && (
+          {confirmationImage && (
             <>
               <h3>トリミング後の画像</h3>
               <img
-                src={croppedImage}
+                src={confirmationImage}
                 alt="Cropped"
                 className={styles.croppedImage}
               />
@@ -325,3 +337,4 @@ const ListingForm = () => {
   );
 };
 export default ListingForm;
+

@@ -25,6 +25,7 @@ import {
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+//商品購入
 const Purchase = () => {
   const router = useRouter();
 

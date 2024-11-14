@@ -20,7 +20,7 @@ import LoginModal from "@/components/loginModal";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
-
+//プロフィール
 export default function Profile() {
   const router = useRouter();
   const [profileInfo, setProfileInfo] = useState({

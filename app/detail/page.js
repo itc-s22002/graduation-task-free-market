@@ -23,19 +23,20 @@ import LoginModal from "@/components/loginModal";
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+//商品詳細
 const Detail = () => {
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const Produts = searchParams.get("m");
 
-  const [item, setItem] = useState(null);
-  const [transactions, setTransactions] = useState(null);
-  const [seller, setSeller] = useState(null);
+  const [item, setItem] = useState(null); //商品データ
+  const [transactions, setTransactions] = useState(null);//取引データ
+  const [seller, setSeller] = useState(null);//出品者情報
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
 
 
-  const [transactionsData, setTransactionsData] = useState(false);
+  const [transactionsData, setTransactionsData] = useState(false);//
 
   const [user, setUser] = useState(null); //ユーザー情報
 
@@ -54,7 +55,8 @@ const Detail = () => {
     // クリーンアップ
     return () => unsubscribe();
   }, []);
-
+  
+  //商品情報から商品の画像データを取得する
   const getImageData = async () => {
     let ProdutsId = Produts;
     let sellerId = "";
