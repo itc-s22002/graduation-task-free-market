@@ -17,10 +17,7 @@ import {
 import Chat from "@/components/chat";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import {
-  getAuth,
-  onAuthStateChanged,
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -39,7 +36,6 @@ const Purchase = () => {
   const [produtsId, setProdutsId] = useState(null);
 
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState(""); //ユーザー情報
 
   const getImageData = async () => {
     let transactionsPid = "";
@@ -51,7 +47,7 @@ const Purchase = () => {
       if (transactionsQuerySnapshot.exists()) {
         getTransactionsId(transactionsQuerySnapshot.id);
         transactionsPid = transactionsQuerySnapshot.data().product_id;
-        sellerId = transactionsQuerySnapshot.data().buyer_id;
+        sellerId = transactionsQuerySnapshot.data().seller_id;
       } else {
         console.log("t data not found");
       }
@@ -83,7 +79,7 @@ const Purchase = () => {
         ...doc.data(),
       }));
       setSeller(itemsArray[0]);
-      console.log(itemsArray[0]);
+      console.log(sellerId);
     } catch (error) {
       console.error("Error fetching  data: ", error);
     }
@@ -108,8 +104,40 @@ const Purchase = () => {
     return () => unsubscribe();
   }, []);
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSendEmail = async (tex) => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: "test",
+          text: tex,
+          email:user.email
+        }),
+      });
+
+      if (response.ok) {
+        setMessage("メールが送信されました！");
+      } else {
+        const errorData = await response.json();
+        setMessage(`エラー: ${errorData.error}`);
+      }
+    } catch (error) {
+      setMessage(`エラー: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onPurchase = (u) => {
     console.log(transactionsId);
+    handleSendEmail("商品が購入されました");
     try {
       const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "購入",
@@ -131,27 +159,65 @@ const Purchase = () => {
     router.push("/");
   };
 
-  const NegotiationButton = (i,u) => {
 
-    if (item.statas  == "交渉中" && item.seller_id != user.uid) {
+  const NegotiationsSuspended = (u) =>{
+    console.log(transactionsId);
+    handleSendEmail("交渉を取り消しました");
+    try {
+      const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
+        statas: "販売中",
+      });
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
+    try {
+      const docRef = updateDoc(doc(db, "Produts", produtsId), {
+        statas: "販売中",
+        buyer_id: u,
+      });
+      alert("販売中");
+    } catch (error) {
+      console.error("アップロード中にエラーが発生しました:", error);
+      alert("アップロードに失敗しました。");
+    }
+    router.push("/");
+  }
+
+  const NegotiationButton = (i, u) => {
+    if (item.statas == "交渉中" && item.seller_id != user.uid) {
       return (
         <>
-          <button
+          {/* <button
             type="submit"
             className={styles.submitButton}
             onClick={() => onPurchase(user.uid)}
           >
             購入
+          </button> */}
+          <button
+            onClick={() => onPurchase(user.uid)}
+            disabled={loading}
+            className={styles.submitButton}
+          >
+            {loading ? "送信中..." : "購入"}
+          </button>
+          {message && <p style={{ marginTop: "20px" }}>{message}</p>}
+          <button
+            onClick={() => NegotiationsSuspended(user.uid)}
+            disabled={loading}
+            className={styles.submitButton}
+          >
+            {loading ? "送信中..." : "交渉取り消し"}
           </button>
         </>
       );
     } else {
-      return (
-        <>
-        </>
-      );
+      return <></>;
     }
   };
+
+  
 
   return (
     <div className={styles.box}>
@@ -186,9 +252,7 @@ const Purchase = () => {
               </div>
 
               <Chat />
-              {user && (
-                <NegotiationButton i = {item} u = {user}/>
-              )}
+              {user && <NegotiationButton i={item} u={user} />}
             </div>
           </>
         )}

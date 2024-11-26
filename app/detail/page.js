@@ -31,12 +31,11 @@ const Detail = () => {
   const Produts = searchParams.get("m");
 
   const [item, setItem] = useState(null); //商品データ
-  const [transactions, setTransactions] = useState(null);//取引データ
-  const [seller, setSeller] = useState(null);//出品者情報
+  const [transactions, setTransactions] = useState(null); //取引データ
+  const [seller, setSeller] = useState(null); //出品者情報
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
 
-
-  const [transactionsData, setTransactionsData] = useState(false);//
+  const [transactionsData, setTransactionsData] = useState(false); //
 
   const [user, setUser] = useState(null); //ユーザー情報
 
@@ -55,7 +54,7 @@ const Detail = () => {
     // クリーンアップ
     return () => unsubscribe();
   }, []);
-  
+
   //商品情報から商品の画像データを取得する
   const getImageData = async () => {
     let ProdutsId = Produts;
@@ -122,7 +121,39 @@ const Detail = () => {
     setIsModalOpen(false);
   };
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSendEmail = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: "test",
+          text: "購入交渉",
+          email: user.email,
+        }),
+      });
+
+      if (response.ok) {
+        setMessage("メールが送信されました！");
+      } else {
+        const errorData = await response.json();
+        setMessage(`エラー: ${errorData.error}`);
+      }
+    } catch (error) {
+      setMessage(`エラー: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addTransactions = async () => {
+    handleSendEmail();
     try {
       //Firebaseにデータの送信
       const docRef = addDoc(collection(db, "Transactions"), {
@@ -156,6 +187,7 @@ const Detail = () => {
     try {
       const docRef = updateDoc(doc(db, "Produts", Produts), {
         statas: "交渉中",
+        buyer_id: user.uid,
       });
     } catch (error) {
       console.error("アップロード中にエラーが発生しました:", error);
@@ -169,6 +201,7 @@ const Detail = () => {
       try {
         const docRef = updateDoc(doc(db, "Produts", Produts), {
           statas: "交渉中",
+          buyer_id: user.uid,
         });
       } catch (error) {
         console.error("アップロード中にエラーが発生しました:", error);
@@ -181,15 +214,15 @@ const Detail = () => {
   return (
     <div className={styles.box}>
       {user ? (
-          <div>
-            {/* <p>{user.email}</p>
+        <div>
+          {/* <p>{user.email}</p>
           <button onClick={() => auth.signOut()}>ログアウト</button> */}
-          </div>
-        ) : (
-          <div>
-            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
-          </div>
-        )}
+        </div>
+      ) : (
+        <div>
+          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+        </div>
+      )}
       <Header />
       <div className={styles.container}>
         {item && (
@@ -227,21 +260,30 @@ const Detail = () => {
               </div>
               {user && (
                 <>
-                {item.statas == "購入" && item.seller_id == user.uid ? (
-                <></>
-              ) : (
-                <>
-                <button
-                  type="submit"
-                  className={styles.submitButton}
-                  onClick={() => onPurchase()}
-                >
-                  購入交渉
-                </button>
+                  {item.statas == "購入" && item.seller_id == user.uid ? (
+                    <></>
+                  ) : (
+                    <>
+                      {/* <button
+                        type="submit"
+                        className={styles.submitButton}
+                        onClick={() => onPurchase()}
+                      >
+                        購入交渉
+                      </button> */}
+                      <button
+                        onClick={() => onPurchase()}
+                        disabled={loading}
+                        className={styles.submitButton}
+                      >
+                        {loading ? "送信中..." : "購入交渉"}
+                      </button>
+                      {message && (
+                        <p style={{ marginTop: "20px" }}>{message}</p>
+                      )}
+                    </>
+                  )}
                 </>
-              )}
-                </>
-
               )}
             </div>
           </>

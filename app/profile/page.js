@@ -38,6 +38,8 @@ export default function Profile() {
   const [negotiatingMerchandises, setNegotiatingMerchandises] = useState(null)
   const [purchaseMerchandises, setPurchaseMerchandises] = useState(null)
   const [purchaseTransactions, setPurchaseTransactions] = useState(null)
+  const [productPurchase, setProductPurchase] = useState(null)
+
 
 
 
@@ -54,6 +56,7 @@ export default function Profile() {
         getNegotiatingMerchandiseCategoryList(uid)
         getPurchaseMerchandiseCategoryList(uid)
         getPurchaseTransactionsCategoryList(uid)
+        getPurchaseTransactionsCategorywaList(uid)
       } else {
         uid = null;
         console.log("not data");
@@ -148,7 +151,7 @@ export default function Profile() {
     }
   }
 
-  //購入された商品一覧
+  //購入した商品一覧
   const getPurchaseTransactionsCategoryList = async (uid) => {
     const q = query(
       collection(db, "Produts"),
@@ -163,6 +166,28 @@ export default function Profile() {
       }));
       console.log(merchandise);
       setPurchaseTransactions(merchandise);
+      return merchandise;
+    } catch (error) {
+      console.error("Error fetching merchandise:", error);
+    }
+
+    //購入する交渉中の商品
+  }
+
+  const getPurchaseTransactionsCategorywaList = async (uid) => {
+    const q = query(
+      collection(db, "Produts"),
+      where("buyer_id", "==", uid),
+      where("statas", "==", "交渉中"),
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const merchandise = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(merchandise);
+      setProductPurchase(merchandise);
       return merchandise;
     } catch (error) {
       console.error("Error fetching merchandise:", error);
@@ -356,6 +381,21 @@ export default function Profile() {
         {purchaseTransactions && (
           <div className={styles.merchandiseList}>
             {purchaseTransactions.map((merchandise) => (
+              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
+                <img src={merchandise.image} alt="Uploaded" width={130} />
+                <p>{merchandise.productName}</p>
+                <p>{merchandise.price}円</p>   
+                <p>{merchandise.productDetails}</p>             
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+      <h3>購入したい商品</h3>
+        {productPurchase && (
+          <div className={styles.merchandiseList}>
+            {productPurchase.map((merchandise) => (
               <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
                 <img src={merchandise.image} alt="Uploaded" width={130} />
                 <p>{merchandise.productName}</p>

@@ -51,6 +51,9 @@ const ListingForm = () => {
   const imageContainerRef = useRef(null); // 画像コンテナの参照を保持する
   const cropperRef = useRef(null);
 
+  const previewCanvasRef = useRef(null);
+
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -92,10 +95,13 @@ const ListingForm = () => {
 
   // 画像を指定位置で正方形にトリミングする
   const cropImage = () => {
+    // if (!selectedImage || !previewCanvasRef.current) return;
+
     const image = new Image();
     image.src = selectedImage;
 
     image.onload = () => {
+      // const canvas = previewCanvasRef.current;
         const canvas = document.createElement("canvas");
         canvas.width = cropSize;
         canvas.height = cropSize;
@@ -103,6 +109,8 @@ const ListingForm = () => {
 
         const scrollX = imageContainerRef.current.scrollLeft; // X軸のスクロール位置
         const scrollY = imageContainerRef.current.scrollTop; // Y軸のスクロール位置
+
+        ctx.clearRect(0, 0, cropSize, cropSize);
 
         ctx.drawImage(
             image,
@@ -129,6 +137,10 @@ const ListingForm = () => {
   useEffect(() => {
     cropImage();
   }, [selectedImage, cropSize]);
+
+  const handleScroll = () => {
+    cropImage();
+  };
 
   //出品商品情報をアップロート
   const handleSubmit = async (e) => {
@@ -237,7 +249,7 @@ const ListingForm = () => {
           />
           {selectedImage && (
             <>
-              <div ref={imageContainerRef} className={styles.imageContainer}>
+              <div ref={imageContainerRef} className={styles.imageContainer} onScroll={handleScroll}>
                 <img src={selectedImage} alt="Selected" />
               </div>
               <div className={styles.controls}>
