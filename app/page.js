@@ -27,21 +27,19 @@ const Home = () => {
         <h2>人気カテゴリー</h2>
         <div className={styles.circleContainer}>
           {categoryselect.map(({ name, image }, index) => (
-            <>
-              <div
-                key={index}
-                className={styles.circle}
-                onClick={() => router.push(`/list?category=${name}`)}
-              >
-                <img
-                  src={image} // publicフォルダ内の画像ファイルパス
-                  alt="サンプル画像"
-                  width={100} // 必須: 画像の幅を指定
-                  height={100} // 必須: 画像の高さを指定
-                />
-                <label>{name}</label>
-              </div>
-            </>
+            <div
+              key={index}
+              className={styles.circle}
+              onClick={() => router.push(`/list?category=${name}`)}
+            >
+              <img
+                src={image} // publicフォルダ内の画像ファイルパス
+                alt="サンプル画像"
+                width={100} // 必須: 画像の幅を指定
+                height={100} // 必須: 画像の高さを指定
+              />
+              <label>{name}</label>
+            </div>
           ))}
         </div>
       </section>

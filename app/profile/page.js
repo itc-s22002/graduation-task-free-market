@@ -50,7 +50,6 @@ export default function Profile() {
       if (authUser) {
         uid = authUser.uid;
         fetchProfile(uid);
-        console.log(authUser);
         setUser(authUser);
         getMerchandiseCategoryList(uid)
         getNegotiatingMerchandiseCategoryList(uid)
@@ -164,7 +163,6 @@ export default function Profile() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setPurchaseTransactions(merchandise);
       return merchandise;
     } catch (error) {
@@ -186,7 +184,6 @@ export default function Profile() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setProductPurchase(merchandise);
       return merchandise;
     } catch (error) {
@@ -216,7 +213,6 @@ export default function Profile() {
 
   // 保存ボタンがクリックされたときの処理
   const handleSave = async () => {
-    console.log(isData);
     try {
       if (isData) {
         const docRef = doc(db, "Users", userId); // user_id 1 のデータを保存

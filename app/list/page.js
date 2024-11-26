@@ -10,7 +10,6 @@ import styles from "../styles/Home.module.css";
 const Lists = () => {
     const searchParams = useSearchParams()
     const category = searchParams.get('category')
-    console.log(category)
   return (
     <div className = {styles.container}>
       <Header />

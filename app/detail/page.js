@@ -66,7 +66,6 @@ const Detail = () => {
       if (produtsQuerySnapshot.exists()) {
         setItem(produtsQuerySnapshot.data());
         sellerId = produtsQuerySnapshot.data().seller_id;
-        console.log(produtsQuerySnapshot.data());
       } else {
         console.log("p data not found");
       }
@@ -100,7 +99,6 @@ const Detail = () => {
         ...doc.data(),
       }));
       setTransactions(itemsArray[0].id);
-      console.log(itemsArray[0].id);
     } catch (error) {
       setTransactionsData(true);
       console.error("Error fetching  data: ", error);
@@ -178,7 +176,6 @@ const Detail = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(itemsArray[0].id);
       router.push(`purchase?t=${itemsArray[0].id}`);
     } catch (error) {
       setTransactionsData(true);
@@ -194,6 +191,8 @@ const Detail = () => {
       alert("アップロードに失敗しました。");
     }
   };
+
+  
   const onPurchase = () => {
     if (transactionsData) {
       addTransactions();
