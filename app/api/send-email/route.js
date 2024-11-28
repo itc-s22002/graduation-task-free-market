@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 
+//メール送信のAPI
 export async function POST(request) {
   try {
     const { email,subject, text } = await request.json();
@@ -12,7 +13,6 @@ export async function POST(request) {
         pass: process.env.GMAIL_PASS,
       },
     });
-    console.log(email)
 
     const mailOptions = {
       from: process.env.GMAIL_USER,

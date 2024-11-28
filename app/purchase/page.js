@@ -79,7 +79,6 @@ const Purchase = () => {
         ...doc.data(),
       }));
       setSeller(itemsArray[0]);
-      console.log(sellerId);
     } catch (error) {
       console.error("Error fetching  data: ", error);
     }
@@ -94,7 +93,6 @@ const Purchase = () => {
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         uid = authUser.uid;
-        console.log(authUser);
         setUser(authUser);
       } else {
         uid = null;
@@ -136,8 +134,8 @@ const Purchase = () => {
   };
 
   const onPurchase = (u) => {
-    console.log(transactionsId);
-    handleSendEmail("商品が購入されました");
+    const currentUrl = window.location.href;
+    handleSendEmail(`商品が購入されました ${currentUrl}`);
     try {
       const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "購入",
@@ -161,8 +159,8 @@ const Purchase = () => {
 
 
   const NegotiationsSuspended = (u) =>{
-    console.log(transactionsId);
-    handleSendEmail("交渉を取り消しました");
+    const currentUrl = window.location.href;
+    handleSendEmail(`交渉を取り消しました ${currentUrl}`);
     try {
       const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "販売中",

@@ -37,7 +37,6 @@ const List = (category) => {
   }, [category]);
 
   const getMerchandiseCategoryList = async (uid) => {
-    console.log(uid)
     let q = query(
       collection(db, "Produts"),
       where("statas", "==", "販売中"),
@@ -59,7 +58,6 @@ const List = (category) => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(merchandise);
       setMerchandise(merchandise);
       return merchandise;
     } catch (error) {
