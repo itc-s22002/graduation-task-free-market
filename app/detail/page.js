@@ -127,12 +127,13 @@ const Detail = () => {
     setMessage("");
 
     try {
+      const currentUrl = window.location.href;
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: "test",
-          text: "購入交渉",
+          text: `購入交渉 ${currentUrl}`,
           email: user.email,
         }),
       });

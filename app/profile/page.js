@@ -34,14 +34,11 @@ export default function Profile() {
   const [isData, setIsData] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
 
-  const [merchandises, setMerchandise] = useState(null);
-  const [negotiatingMerchandises, setNegotiatingMerchandises] = useState(null)
-  const [purchaseMerchandises, setPurchaseMerchandises] = useState(null)
-  const [purchaseTransactions, setPurchaseTransactions] = useState(null)
-  const [productPurchase, setProductPurchase] = useState(null)
-
-
-
+  const [merchandises, setMerchandise] = useState([]);
+  const [negotiatingMerchandises, setNegotiatingMerchandises] = useState([]);
+  const [purchaseMerchandises, setPurchaseMerchandises] = useState([]);
+  const [purchaseTransactions, setPurchaseTransactions] = useState([]);
+  const [productPurchase, setProductPurchase] = useState([]);
 
   // ユーザー情報の取得
   useEffect(() => {
@@ -51,11 +48,11 @@ export default function Profile() {
         uid = authUser.uid;
         fetchProfile(uid);
         setUser(authUser);
-        getMerchandiseCategoryList(uid)
-        getNegotiatingMerchandiseCategoryList(uid)
-        getPurchaseMerchandiseCategoryList(uid)
-        getPurchaseTransactionsCategoryList(uid)
-        getPurchaseTransactionsCategorywaList(uid)
+        getMerchandiseCategoryList(uid);
+        getNegotiatingMerchandiseCategoryList(uid);
+        getPurchaseMerchandiseCategoryList(uid);
+        getPurchaseTransactionsCategoryList(uid);
+        getPurchaseTransactionsCategorywaList(uid);
       } else {
         uid = null;
         console.log("not data");
@@ -93,10 +90,7 @@ export default function Profile() {
 
   //出品した商品一覧
   const getMerchandiseCategoryList = async (uid) => {
-    const q = query(
-      collection(db, "Produts"),
-      where("seller_id", "==", uid)
-    );
+    const q = query(collection(db, "Produts"), where("seller_id", "==", uid));
     try {
       const querySnapshot = await getDocs(q);
       const merchandise = querySnapshot.docs.map((doc) => ({
@@ -115,7 +109,7 @@ export default function Profile() {
     const q = query(
       collection(db, "Produts"),
       where("seller_id", "==", uid),
-      where("statas", "==", "交渉中"),
+      where("statas", "==", "交渉中")
     );
     try {
       const querySnapshot = await getDocs(q);
@@ -135,7 +129,7 @@ export default function Profile() {
     const q = query(
       collection(db, "Produts"),
       where("seller_id", "==", uid),
-      where("statas", "==", "購入"),
+      where("statas", "==", "購入")
     );
     try {
       const querySnapshot = await getDocs(q);
@@ -148,14 +142,14 @@ export default function Profile() {
     } catch (error) {
       console.error("Error fetching merchandise:", error);
     }
-  }
+  };
 
   //購入した商品一覧
   const getPurchaseTransactionsCategoryList = async (uid) => {
     const q = query(
       collection(db, "Produts"),
       where("buyer_id", "==", uid),
-      where("statas", "==", "購入"),
+      where("statas", "==", "購入")
     );
     try {
       const querySnapshot = await getDocs(q);
@@ -170,13 +164,13 @@ export default function Profile() {
     }
 
     //購入する交渉中の商品
-  }
+  };
 
   const getPurchaseTransactionsCategorywaList = async (uid) => {
     const q = query(
       collection(db, "Produts"),
       where("buyer_id", "==", uid),
-      where("statas", "==", "交渉中"),
+      where("statas", "==", "交渉中")
     );
     try {
       const querySnapshot = await getDocs(q);
@@ -189,9 +183,7 @@ export default function Profile() {
     } catch (error) {
       console.error("Error fetching merchandise:", error);
     }
-  }
-
-  
+  };
 
   //ログインモーダルの表示
   const openModal = () => {
@@ -327,80 +319,134 @@ export default function Profile() {
       <button className={styles.saveButton} onClick={handleSave}>
         保存
       </button>
-      <div>
-      <h3>商品一覧</h3>
-        {merchandises && (
-          <div className={styles.merchandiseList}>
-            {merchandises.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
-                <img src={merchandise.image} alt="Uploaded" width={130} />
-                <p>{merchandise.productName}</p>
-                <p>{merchandise.price}円</p>   
-                <p>{merchandise.productDetails}</p>             
-              </div>
-            ))}
-          </div>
-        )}
+      <h2>商品一覧</h2>
+      <div className={styles.selle}>
+        <div>
+          {merchandises === 0 ? (
+            <p>No Data</p>
+          ) : (
+            <>
+              {merchandises && (
+                <div className={styles.merchandiseList}>
+                  {merchandises.map((merchandise) => (
+                    <div
+                      key={merchandise.id}
+                      className={styles.merchandiseCard}
+                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
+                    >
+                      <img src={merchandise.image} alt="Uploaded" width={130} />
+                      <p>{merchandise.productName}</p>
+                      <p>{merchandise.price}円</p>
+                      <p>{merchandise.productDetails}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div>
+          <h3>交渉中の商品一覧</h3>
+          {negotiatingMerchandises.length === 0 ? (
+            <p>No Data</p>
+          ) : (
+            <>
+              {negotiatingMerchandises && (
+                <div className={styles.merchandiseList}>
+                  {negotiatingMerchandises.map((merchandise) => (
+                    <div
+                      key={merchandise.id}
+                      className={styles.merchandiseCard}
+                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
+                    >
+                      <img src={merchandise.image} alt="Uploaded" width={130} />
+                      <p>{merchandise.productName}</p>
+                      <p>{merchandise.price}円</p>
+                      <p>{merchandise.productDetails}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div>
+          <h3>購入されたの商品一覧</h3>
+          {purchaseMerchandises.length === 0 ? (
+            <p>No data</p>
+          ) : (
+            <>
+              {purchaseMerchandises && (
+                <div className={styles.merchandiseList}>
+                  {purchaseMerchandises.map((merchandise) => (
+                    <div
+                      key={merchandise.id}
+                      className={styles.merchandiseCard}
+                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
+                    >
+                      <img src={merchandise.image} alt="Uploaded" width={130} />
+                      <p>{merchandise.productName}</p>
+                      <p>{merchandise.price}円</p>
+                      <p>{merchandise.productDetails}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-      <div>
-      <h3>交渉中の商品一覧</h3>
-        {negotiatingMerchandises && (
-          <div className={styles.merchandiseList}>
-            {negotiatingMerchandises.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
-                <img src={merchandise.image} alt="Uploaded" width={130} />
-                <p>{merchandise.productName}</p>
-                <p>{merchandise.price}円</p>   
-                <p>{merchandise.productDetails}</p>             
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div>
-      <h3>購入されたの商品一覧</h3>
-        {purchaseMerchandises && (
-          <div className={styles.merchandiseList}>
-            {purchaseMerchandises.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
-                <img src={merchandise.image} alt="Uploaded" width={130} />
-                <p>{merchandise.productName}</p>
-                <p>{merchandise.price}円</p>   
-                <p>{merchandise.productDetails}</p>             
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div>
-      <h3>購入した商品一覧</h3>
-        {purchaseTransactions && (
-          <div className={styles.merchandiseList}>
-            {purchaseTransactions.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
-                <img src={merchandise.image} alt="Uploaded" width={130} />
-                <p>{merchandise.productName}</p>
-                <p>{merchandise.price}円</p>   
-                <p>{merchandise.productDetails}</p>             
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div>
-      <h3>購入したい商品</h3>
-        {productPurchase && (
-          <div className={styles.merchandiseList}>
-            {productPurchase.map((merchandise) => (
-              <div key={merchandise.id} className={styles.merchandiseCard} onClick={() => router.push(`/detail?m=${merchandise.id}`)}>
-                <img src={merchandise.image} alt="Uploaded" width={130} />
-                <p>{merchandise.productName}</p>
-                <p>{merchandise.price}円</p>   
-                <p>{merchandise.productDetails}</p>             
-              </div>
-            ))}
-          </div>
-        )}
+      <div className={styles.buyer}>
+        <div>
+          <h3>購入したい商品</h3>
+          {productPurchase.length === 0 ? (
+            <p>No data</p>
+          ) : (
+            <>
+              {productPurchase && (
+                <div className={styles.merchandiseList}>
+                  {productPurchase.map((merchandise) => (
+                    <div
+                      key={merchandise.id}
+                      className={styles.merchandiseCard}
+                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
+                    >
+                      <img src={merchandise.image} alt="Uploaded" width={130} />
+                      <p>{merchandise.productName}</p>
+                      <p>{merchandise.price}円</p>
+                      <p>{merchandise.productDetails}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div>
+          <h3>購入した商品一覧</h3>
+          {purchaseTransactions.length === 0?(
+            <p>No data</p>
+          ):(
+            <>
+            {purchaseTransactions && (
+            <div className={styles.merchandiseList}>
+              {purchaseTransactions.map((merchandise) => (
+                <div
+                  key={merchandise.id}
+                  className={styles.merchandiseCard}
+                  onClick={() => router.push(`/detail?m=${merchandise.id}`)}
+                >
+                  <img src={merchandise.image} alt="Uploaded" width={130} />
+                  <p>{merchandise.productName}</p>
+                  <p>{merchandise.price}円</p>
+                  <p>{merchandise.productDetails}</p>
+                </div>
+              ))}
+            </div>
+          )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

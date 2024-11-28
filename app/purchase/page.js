@@ -134,7 +134,8 @@ const Purchase = () => {
   };
 
   const onPurchase = (u) => {
-    handleSendEmail("商品が購入されました");
+    const currentUrl = window.location.href;
+    handleSendEmail(`商品が購入されました ${currentUrl}`);
     try {
       const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "購入",
@@ -158,7 +159,8 @@ const Purchase = () => {
 
 
   const NegotiationsSuspended = (u) =>{
-    handleSendEmail("交渉を取り消しました");
+    const currentUrl = window.location.href;
+    handleSendEmail(`交渉を取り消しました ${currentUrl}`);
     try {
       const docRef = updateDoc(doc(db, "Transactions", transactionsId), {
         statas: "販売中",
