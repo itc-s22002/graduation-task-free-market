@@ -17,6 +17,7 @@ import styles from "../styles/Profile.module.css";
 import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import LoginModal from "@/components/loginModal";
+import { Suspense } from "react";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -241,213 +242,245 @@ export default function Profile() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.icon} onClick={handleHomeClick}>
-          <Image
-            src="/home.png" // publicフォルダ内の画像ファイルパス
-            alt="サンプル画像"
-            width={50} // 必須: 画像の幅を指定
-            height={50} // 必須: 画像の高さを指定
-          />
-        </div>
-        <h1 className={styles.title}>プロフィール(PROFILE)</h1>
-        {isSaved && ( // 保存後に名前、学籍番号、所属校を表示
-          <div className={styles.profileDetails}>
-            <span className={styles.profileName}>{profileInfo.name}</span>
-            <span className={styles.profileSchool}>{profileInfo.school}</span>
-            <span className={styles.profileStudentId}>
-              {profileInfo.studentId}
-            </span>
+    <Suspense fallback={<div>Loding...</div>}>
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <div className={styles.icon} onClick={handleHomeClick}>
+            <Image
+              src="/home.png" // publicフォルダ内の画像ファイルパス
+              alt="サンプル画像"
+              width={50} // 必須: 画像の幅を指定
+              height={50} // 必須: 画像の高さを指定
+            />
           </div>
-        )}
-      </header>
-      <div className={styles.icon2} onClick={() => router.back("/")}>
-        <Image
-          src="/back.png" // publicフォルダ内の画像ファイルパス
-          alt="サンプル画像"
-          width={25} // 必須: 画像の幅を指定
-          height={25} // 必須: 画像の高さを指定
-        />
-      </div>
-      {user ? (
-        <div>
-          {/* <p>{user.email}</p>
-          <button onClick={() => auth.signOut()}>ログアウト</button> */}
-        </div>
-      ) : (
-        <div>
-          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
-        </div>
-      )}
-      <section className={styles.profileSection}>
-        <div className={styles.inputGroup}>
-          <label className={styles.label}>名前</label>
-          <input
-            className={styles.input}
-            type="text"
-            name="name"
-            placeholder="名前を入力"
-            value={profileInfo.name}
-            onChange={handleChange}
-          />
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.label}>学籍番号</label>
-          <input
-            className={styles.input}
-            type="text"
-            name="studentId"
-            placeholder="学籍番号を入力"
-            value={profileInfo.studentId}
-            onChange={handleChange}
-          />
-        </div>
-        <div className={styles.inputGroup}>
-          <label className={styles.label}>所属校</label>
-          <input
-            className={styles.input}
-            type="text"
-            name="school"
-            placeholder="所属校を入力"
-            value={profileInfo.school}
-            onChange={handleChange}
-          />
-        </div>
-      </section>
-
-      <button className={styles.saveButton} onClick={handleSave}>
-        保存
-      </button>
-      <h2>商品一覧</h2>
-      <div className={styles.selle}>
-        <div>
-          {merchandises === 0 ? (
-            <p>No Data</p>
-          ) : (
-            <>
-              {merchandises && (
-                <div className={styles.merchandiseList}>
-                  {merchandises.map((merchandise) => (
-                    <div
-                      key={merchandise.id}
-                      className={styles.merchandiseCard}
-                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
-                    >
-                      <img src={merchandise.image} alt="Uploaded" width={130} />
-                      <p>{merchandise.productName}</p>
-                      <p>{merchandise.price}円</p>
-                      <p>{merchandise.productDetails}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div>
-          <h3>交渉中の商品一覧</h3>
-          {negotiatingMerchandises.length === 0 ? (
-            <p>No Data</p>
-          ) : (
-            <>
-              {negotiatingMerchandises && (
-                <div className={styles.merchandiseList}>
-                  {negotiatingMerchandises.map((merchandise) => (
-                    <div
-                      key={merchandise.id}
-                      className={styles.merchandiseCard}
-                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
-                    >
-                      <img src={merchandise.image} alt="Uploaded" width={130} />
-                      <p>{merchandise.productName}</p>
-                      <p>{merchandise.price}円</p>
-                      <p>{merchandise.productDetails}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div>
-          <h3>購入されたの商品一覧</h3>
-          {purchaseMerchandises.length === 0 ? (
-            <p>No data</p>
-          ) : (
-            <>
-              {purchaseMerchandises && (
-                <div className={styles.merchandiseList}>
-                  {purchaseMerchandises.map((merchandise) => (
-                    <div
-                      key={merchandise.id}
-                      className={styles.merchandiseCard}
-                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
-                    >
-                      <img src={merchandise.image} alt="Uploaded" width={130} />
-                      <p>{merchandise.productName}</p>
-                      <p>{merchandise.price}円</p>
-                      <p>{merchandise.productDetails}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      <div className={styles.buyer}>
-        <div>
-          <h3>購入したい商品</h3>
-          {productPurchase.length === 0 ? (
-            <p>No data</p>
-          ) : (
-            <>
-              {productPurchase && (
-                <div className={styles.merchandiseList}>
-                  {productPurchase.map((merchandise) => (
-                    <div
-                      key={merchandise.id}
-                      className={styles.merchandiseCard}
-                      onClick={() => router.push(`/detail?m=${merchandise.id}`)}
-                    >
-                      <img src={merchandise.image} alt="Uploaded" width={130} />
-                      <p>{merchandise.productName}</p>
-                      <p>{merchandise.price}円</p>
-                      <p>{merchandise.productDetails}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-        <div>
-          <h3>購入した商品一覧</h3>
-          {purchaseTransactions.length === 0?(
-            <p>No data</p>
-          ):(
-            <>
-            {purchaseTransactions && (
-            <div className={styles.merchandiseList}>
-              {purchaseTransactions.map((merchandise) => (
-                <div
-                  key={merchandise.id}
-                  className={styles.merchandiseCard}
-                  onClick={() => router.push(`/detail?m=${merchandise.id}`)}
-                >
-                  <img src={merchandise.image} alt="Uploaded" width={130} />
-                  <p>{merchandise.productName}</p>
-                  <p>{merchandise.price}円</p>
-                  <p>{merchandise.productDetails}</p>
-                </div>
-              ))}
+          <h1 className={styles.title}>プロフィール(PROFILE)</h1>
+          {isSaved && ( // 保存後に名前、学籍番号、所属校を表示
+            <div className={styles.profileDetails}>
+              <span className={styles.profileName}>{profileInfo.name}</span>
+              <span className={styles.profileSchool}>{profileInfo.school}</span>
+              <span className={styles.profileStudentId}>
+                {profileInfo.studentId}
+              </span>
             </div>
           )}
-            </>
-          )}
+        </header>
+        <div className={styles.icon2} onClick={() => router.back("/")}>
+          <Image
+            src="/back.png" // publicフォルダ内の画像ファイルパス
+            alt="サンプル画像"
+            width={25} // 必須: 画像の幅を指定
+            height={25} // 必須: 画像の高さを指定
+          />
+        </div>
+        {user ? (
+          <div>
+            {/* <p>{user.email}</p>
+          <button onClick={() => auth.signOut()}>ログアウト</button> */}
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
+        <section className={styles.profileSection}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>名前</label>
+            <input
+              className={styles.input}
+              type="text"
+              name="name"
+              placeholder="名前を入力"
+              value={profileInfo.name}
+              onChange={handleChange}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>学籍番号</label>
+            <input
+              className={styles.input}
+              type="text"
+              name="studentId"
+              placeholder="学籍番号を入力"
+              value={profileInfo.studentId}
+              onChange={handleChange}
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>所属校</label>
+            <input
+              className={styles.input}
+              type="text"
+              name="school"
+              placeholder="所属校を入力"
+              value={profileInfo.school}
+              onChange={handleChange}
+            />
+          </div>
+        </section>
+
+        <button className={styles.saveButton} onClick={handleSave}>
+          保存
+        </button>
+        <h2>商品一覧</h2>
+        <div className={styles.selle}>
+          <div>
+            {merchandises === 0 ? (
+              <p>No Data</p>
+            ) : (
+              <>
+                {merchandises && (
+                  <div className={styles.merchandiseList}>
+                    {merchandises.map((merchandise) => (
+                      <div
+                        key={merchandise.id}
+                        className={styles.merchandiseCard}
+                        onClick={() =>
+                          router.push(`/detail?m=${merchandise.id}`)
+                        }
+                      >
+                        <img
+                          src={merchandise.image}
+                          alt="Uploaded"
+                          width={130}
+                        />
+                        <p>{merchandise.productName}</p>
+                        <p>{merchandise.price}円</p>
+                        <p>{merchandise.productDetails}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div>
+            <h3>交渉中の商品一覧</h3>
+            {negotiatingMerchandises.length === 0 ? (
+              <p>No Data</p>
+            ) : (
+              <>
+                {negotiatingMerchandises && (
+                  <div className={styles.merchandiseList}>
+                    {negotiatingMerchandises.map((merchandise) => (
+                      <div
+                        key={merchandise.id}
+                        className={styles.merchandiseCard}
+                        onClick={() =>
+                          router.push(`/detail?m=${merchandise.id}`)
+                        }
+                      >
+                        <img
+                          src={merchandise.image}
+                          alt="Uploaded"
+                          width={130}
+                        />
+                        <p>{merchandise.productName}</p>
+                        <p>{merchandise.price}円</p>
+                        <p>{merchandise.productDetails}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div>
+            <h3>購入されたの商品一覧</h3>
+            {purchaseMerchandises.length === 0 ? (
+              <p>No data</p>
+            ) : (
+              <>
+                {purchaseMerchandises && (
+                  <div className={styles.merchandiseList}>
+                    {purchaseMerchandises.map((merchandise) => (
+                      <div
+                        key={merchandise.id}
+                        className={styles.merchandiseCard}
+                        onClick={() =>
+                          router.push(`/detail?m=${merchandise.id}`)
+                        }
+                      >
+                        <img
+                          src={merchandise.image}
+                          alt="Uploaded"
+                          width={130}
+                        />
+                        <p>{merchandise.productName}</p>
+                        <p>{merchandise.price}円</p>
+                        <p>{merchandise.productDetails}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+        <div className={styles.buyer}>
+          <div>
+            <h3>購入したい商品</h3>
+            {productPurchase.length === 0 ? (
+              <p>No data</p>
+            ) : (
+              <>
+                {productPurchase && (
+                  <div className={styles.merchandiseList}>
+                    {productPurchase.map((merchandise) => (
+                      <div
+                        key={merchandise.id}
+                        className={styles.merchandiseCard}
+                        onClick={() =>
+                          router.push(`/detail?m=${merchandise.id}`)
+                        }
+                      >
+                        <img
+                          src={merchandise.image}
+                          alt="Uploaded"
+                          width={130}
+                        />
+                        <p>{merchandise.productName}</p>
+                        <p>{merchandise.price}円</p>
+                        <p>{merchandise.productDetails}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div>
+            <h3>購入した商品一覧</h3>
+            {purchaseTransactions.length === 0 ? (
+              <p>No data</p>
+            ) : (
+              <>
+                {purchaseTransactions && (
+                  <div className={styles.merchandiseList}>
+                    {purchaseTransactions.map((merchandise) => (
+                      <div
+                        key={merchandise.id}
+                        className={styles.merchandiseCard}
+                        onClick={() =>
+                          router.push(`/detail?m=${merchandise.id}`)
+                        }
+                      >
+                        <img
+                          src={merchandise.image}
+                          alt="Uploaded"
+                          width={130}
+                        />
+                        <p>{merchandise.productName}</p>
+                        <p>{merchandise.price}円</p>
+                        <p>{merchandise.productDetails}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
