@@ -13,13 +13,19 @@ const Lists = () => {
     const searchParams = useSearchParams()
     const category = searchParams.get('category')
   return (
-    <Suspense fallback={<div>Loding...</div>}>
       <div className = {styles.container}>
       <Header />
       <h3>{category}・カテゴリー一覧</h3>
       <List category = {category}/>
     </div>
-    </Suspense>
   );
 };
-export default Lists;
+
+const Page = () => {
+  return(
+    <Suspense fallback={<div>Loading...</div>}>
+      <Lists />
+    </Suspense>
+  )
+}
+export default Page;
