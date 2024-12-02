@@ -212,7 +212,6 @@ const Detail = () => {
   };
 
   return (
-    <Suspense fallback={<div>Loding...</div>}>
       <div className={styles.box}>
         {user ? (
           <div>
@@ -291,8 +290,15 @@ const Detail = () => {
           )}
         </div>
       </div>
-    </Suspense>
   );
 };
 
-export default Detail;
+const Page = () => {
+  return(
+    <Suspense fallback={<div>Loading...</div>}>
+    <Detail />
+  </Suspense>
+  )
+}
+
+export default Page;
