@@ -19,6 +19,7 @@ import {
 import { useSearchParams, useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import LoginModal from "@/components/loginModal";
+import { Suspense } from "react";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -193,7 +194,6 @@ const Detail = () => {
     }
   };
 
-  
   const onPurchase = () => {
     if (transactionsData) {
       addTransactions();
@@ -212,84 +212,86 @@ const Detail = () => {
   };
 
   return (
-    <div className={styles.box}>
-      {user ? (
-        <div>
-          {/* <p>{user.email}</p>
+    <Suspense fallback={<div>Loding...</div>}>
+      <div className={styles.box}>
+        {user ? (
+          <div>
+            {/* <p>{user.email}</p>
           <button onClick={() => auth.signOut()}>ログアウト</button> */}
-        </div>
-      ) : (
-        <div>
-          <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
-        </div>
-      )}
-      <Header />
-      <div className={styles.container}>
-        {item && (
-          <>
-            <div className={styles.containerUpImage}>
-              <>
-                <img
-                  src={item.image}
-                  alt="Cropped"
-                  className={styles.croppedImage}
-                />
-              </>
-            </div>
-
-            <div className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label>商品名</label>
-                <div className={styles.input}>{item.productName}</div>
-                <label>商品詳細</label>
-                <div className={styles.input}>{item.productDetails}</div>
-                <label>支払い金額</label>
-                <div className={styles.input}>{item.price}円</div>
-                <label>受取場所</label>
-                <div className={styles.input}>{item.location}</div>
-                <label>出品者</label>
-                <div className={styles.input}>
-                  {seller && (
-                    <>
-                      <p>ニックネーム：{seller.name}</p>
-                      <p>学校：{seller.school}</p>
-                      <p>学籍番号：{seller.student_id}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-              {user && (
+          </div>
+        ) : (
+          <div>
+            <LoginModal isOpen={isModalOpen} onRequestClose={closeModal} />
+          </div>
+        )}
+        <Header />
+        <div className={styles.container}>
+          {item && (
+            <>
+              <div className={styles.containerUpImage}>
                 <>
-                  {item.statas == "購入" && item.seller_id == user.uid ? (
-                    <></>
-                  ) : (
-                    <>
-                      {/* <button
+                  <img
+                    src={item.image}
+                    alt="Cropped"
+                    className={styles.croppedImage}
+                  />
+                </>
+              </div>
+
+              <div className={styles.form}>
+                <div className={styles.inputGroup}>
+                  <label>商品名</label>
+                  <div className={styles.input}>{item.productName}</div>
+                  <label>商品詳細</label>
+                  <div className={styles.input}>{item.productDetails}</div>
+                  <label>支払い金額</label>
+                  <div className={styles.input}>{item.price}円</div>
+                  <label>受取場所</label>
+                  <div className={styles.input}>{item.location}</div>
+                  <label>出品者</label>
+                  <div className={styles.input}>
+                    {seller && (
+                      <>
+                        <p>ニックネーム：{seller.name}</p>
+                        <p>学校：{seller.school}</p>
+                        <p>学籍番号：{seller.student_id}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {user && (
+                  <>
+                    {item.statas == "購入" && item.seller_id == user.uid ? (
+                      <></>
+                    ) : (
+                      <>
+                        {/* <button
                         type="submit"
                         className={styles.submitButton}
                         onClick={() => onPurchase()}
                       >
                         購入交渉
                       </button> */}
-                      <button
-                        onClick={() => onPurchase()}
-                        disabled={loading}
-                        className={styles.submitButton}
-                      >
-                        {loading ? "送信中..." : "購入交渉"}
-                      </button>
-                      {message && (
-                        <p style={{ marginTop: "20px" }}>{message}</p>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </>
-        )}
+                        <button
+                          onClick={() => onPurchase()}
+                          disabled={loading}
+                          className={styles.submitButton}
+                        >
+                          {loading ? "送信中..." : "購入交渉"}
+                        </button>
+                        {message && (
+                          <p style={{ marginTop: "20px" }}>{message}</p>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </Suspense>
   );
 };
 

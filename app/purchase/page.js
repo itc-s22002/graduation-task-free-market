@@ -18,6 +18,8 @@ import Chat from "@/components/chat";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { Suspense } from "react";
+
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -218,7 +220,8 @@ const Purchase = () => {
   
 
   return (
-    <div className={styles.box}>
+    <Suspense fallback={<div>Loding...</div>}>
+        <div className={styles.box}>
       <Header />
       <div className={styles.container}>
         {item && (
@@ -256,6 +259,8 @@ const Purchase = () => {
         )}
       </div>
     </div>
+
+    </Suspense>
   );
 };
 

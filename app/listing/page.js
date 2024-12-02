@@ -23,6 +23,9 @@ import {
 
 import LoginModal from "@/components/loginModal";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { Suspense } from "react";
+
+
 
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -220,7 +223,7 @@ const ListingForm = () => {
   }
 
   return (
-    <>
+    <Suspense fallback={<div>Loding...</div>}>
       <div className={styles.icon2} onClick={() => router.back("/")}>
         <img
           src="/back.png" // publicフォルダ内の画像ファイルパス
@@ -345,7 +348,7 @@ const ListingForm = () => {
           </div>
         </form>
       </div>
-    </>
+    </ Suspense>
   );
 };
 export default ListingForm;
