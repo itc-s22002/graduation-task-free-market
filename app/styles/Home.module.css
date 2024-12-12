@@ -36,3 +36,9 @@
     height: 300px;
     background-color: #d3d3d3;
 }
+
+@media (max-width: 768px) {
+    .popularCategory {
+      display: none;
+    }
+  }
