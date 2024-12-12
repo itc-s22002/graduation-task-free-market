@@ -36,6 +36,7 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      max-height: 70px;
     }
     
     .dropdownMenu {
@@ -60,4 +61,15 @@
     
     .menuItem:hover {
       background-color: #f1f1f1;
+    }
+
+    @media (max-width: 768px) {
+      .dropdownButton {
+        font-size: 14px; /* フォントサイズを調整 */
+        padding: 8px 12px; /* ボタンの余白を調整 */
+      }
+      .uploadButton{
+        font-size: 14px; /* フォントサイズを調整 */
+        padding: 12px 30px; /* ボタンの余白を調整 */
+      }
     }
