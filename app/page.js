@@ -27,9 +27,8 @@ const Home = () => {
         <h2>人気カテゴリー</h2>
         <div className={styles.circleContainer}>
           {categoryselect.map(({ name, image }, index) => (
-            <div className={styles.box}>
+            <div key={index} className={styles.box}>
               <div
-                key={index}
                 className={styles.circle}
                 onClick={() => router.push(`/list?category=${name}`)}
               >
