@@ -11,6 +11,26 @@ const Header = () => {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const [imageSrc, setImageSrc] = useState('/images/image-large.jpg');
+
+  useEffect(() => {
+    const updateImage = () => {
+      if (window.innerWidth <= 416) {
+        setImageSrc('/gaicalemarketRogo1.png');
+      } else {
+        setImageSrc('/logo5.png');
+      }
+    };
+
+    // 初回ロード時とリサイズ時に画像を更新
+    updateImage();
+    window.addEventListener('resize', updateImage);
+
+    return () => {
+      window.removeEventListener('resize', updateImage);
+    };
+  }, []);
+
   // メニューの表示状態を切り替える関数
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
@@ -32,54 +52,64 @@ const Header = () => {
   };
 
   const selectCategory = (c) => {
-    setIsOpen(false)
-    router.push(`/list?category=${c}`)
-    }
+    setIsOpen(false);
+    router.push(`/list?category=${c}`);
+  };
   return (
-    <header className={styles.header}>
-      <div className={styles.icon} onClick={() => router.push("/")}>
-        <Image
-          src="/home.png" // publicフォルダ内の画像ファイルパス
+    <>
+      <div className={styles.hima} onClick={() => router.push("/")}>
+        <img
+          src={imageSrc} // publicフォルダ内の画像ファイルパス
           alt="サンプル画像"
-          width={50} // 必須: 画像の幅を指定
-          height={50} // 必須: 画像の高さを指定
+          className={styles.title}
         />
       </div>
-      <div className={styles.dropdownContainer}>
-        <button onClick={toggleMenu} className={styles.dropdownButton}>
-          カテゴリー
-        </button>
-        {isOpen && (
-          <div className={styles.dropdownMenu}>
-            {categoryselect.map((val, index) => (
-              <div
-                key={index}
-                value={val.name}
-                className={styles.menuItem}
-                onClick={() => selectCategory(val.name)}
-              >
-                {val.name}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <header className={styles.header}>
+        <div className={styles.icon} onClick={() => router.push("/")}>
+          <Image
+            src="/home.png" // publicフォルダ内の画像ファイルパス
+            alt="サンプル画像"
+            width={50} // 必須: 画像の幅を指定
+            height={50} // 必須: 画像の高さを指定
+          />
+        </div>
+        <div className={styles.dropdownContainer}>
+          <button onClick={toggleMenu} className={styles.dropdownButton}>
+            カテゴリー
+          </button>
+          {isOpen && (
+            <div className={styles.dropdownMenu}>
+              {categoryselect.map((val, index) => (
+                <div
+                  key={index}
+                  value={val.name}
+                  className={styles.menuItem}
+                  onClick={() => selectCategory(val.name)}
+                >
+                  {val.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      <div className={styles.icon} onClick={() => router.push("/profile")}>
-        <Image
-          src="/people.png" // publicフォルダ内の画像ファイルパス
-          alt="サンプル画像"
-          width={50} // 必須: 画像の幅を指定
-          height={50} // 必須: 画像の高さを指定
-        />
-      </div>
-      <button
-        className={styles.uploadButton}
-        onClick={() => router.push("/listing")}
-      >
-        出品
-      </button>
-    </header>
+        <div className={styles.icon} onClick={() => router.push("/profile")}>
+          <Image
+            src="/people.png" // publicフォルダ内の画像ファイルパス
+            alt="サンプル画像"
+            width={50} // 必須: 画像の幅を指定
+            height={50} // 必須: 画像の高さを指定
+          />
+        </div>
+
+        <button
+          className={styles.uploadButton}
+          onClick={() => router.push("/listing")}
+        >
+          出品
+        </button>
+      </header>
+    </>
   );
 };
 
