@@ -36,7 +36,7 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      max-height: 70px;
+      max-height: 50%;
     }
     
     .dropdownMenu {
@@ -61,6 +61,21 @@
     
     .menuItem:hover {
       background-color: #f1f1f1;
+    }
+
+    .title{
+      max-width: 30%;             /* 画像の幅を画面幅の100%以下に制限 */
+      max-height: 60vh;            /* 画像の高さを画面高の60%以下に制限 */
+      height: auto;                /* 縦横比を維持しつつ高さを自動調整 */
+      width: auto;   
+    }
+
+    .hima{
+      display: flex;               /* フレックスボックス */
+  justify-content: center;     /* 横方向の中央揃え */
+  align-items: center;         /* 縦方向の中央揃え */
+  height: 100%;                /* 親コンテナの高さを100%に設定 */
+  width: 100%; 
     }
 
     @media (max-width: 768px) {

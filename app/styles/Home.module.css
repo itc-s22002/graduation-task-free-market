@@ -7,8 +7,13 @@
 }
 
 .circleContainer {
-    display: flex;
-    justify-content: space-around;
+    /* display: flex;
+    justify-content: space-around; */
+    display: flex;               /* フレックスボックスで横並びにする */
+    overflow-x: auto;            /* 横スクロールを有効にする */
+    white-space: nowrap;         /* 折り返さないようにする */
+    gap: 20px;                   /* 要素間の余白 */
+    padding: 10px; 
 }
 
 .circle {
@@ -37,8 +42,17 @@
     background-color: #d3d3d3;
 }
 
-@media (max-width: 768px) {
-    .popularCategory {
-      display: none;
-    }
-  }
+.box{
+    /* display: flex;          
+  flex-direction: column;  
+  align-items: center; 
+  text-align: center; */
+  flex: 0 0 auto;              /* 各要素のサイズを固定し、縮小を防ぐ */
+  text-align: center; 
+}
+
+.box img{
+    display: block;
+    margin: 0 auto;    
+}
+
