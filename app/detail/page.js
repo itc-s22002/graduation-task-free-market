@@ -66,6 +66,7 @@ const Detail = () => {
 
       if (produtsQuerySnapshot.exists()) {
         setItem(produtsQuerySnapshot.data());
+        console.log(produtsQuerySnapshot.data())
         sellerId = produtsQuerySnapshot.data().seller_id;
       } else {
         console.log("p data not found");
@@ -135,7 +136,7 @@ const Detail = () => {
         body: JSON.stringify({
           subject: "test",
           text: `購入交渉 ${currentUrl}`,
-          email: user.email,
+          email: seller.email,
         }),
       });
 
@@ -260,7 +261,7 @@ const Detail = () => {
                 </div>
                 {user && (
                   <>
-                    {item.statas == "購入" && item.seller_id == user.uid ? (
+                    {item.statas == "購入" || item.seller_id == user.uid ? (
                       <></>
                     ) : (
                       <>
