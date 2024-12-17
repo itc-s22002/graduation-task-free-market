@@ -265,13 +265,6 @@ const Detail = () => {
                       <></>
                     ) : (
                       <>
-                        {/* <button
-                        type="submit"
-                        className={styles.submitButton}
-                        onClick={() => onPurchase()}
-                      >
-                        購入交渉
-                      </button> */}
                         <button
                           onClick={() => onPurchase()}
                           disabled={loading}
