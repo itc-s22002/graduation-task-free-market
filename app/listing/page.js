@@ -12,7 +12,6 @@ import {
 } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
 
-
 import {
   getStorage,
   ref,
@@ -24,8 +23,6 @@ import {
 import LoginModal from "@/components/loginModal";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Suspense } from "react";
-
-
 
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -42,20 +39,20 @@ const ListingForm = () => {
   const [location, setLocation] = useState(""); //受取場所
 
   const [isModalOpen, setIsModalOpen] = useState(false); //ログインモーダル
+  const [checkModal, setCheckModal] = useState(false);
 
   const [user, setUser] = useState(null); //ユーザー情報
   const [loading, setLoading] = useState(true);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [croppedImage, setCroppedImage] = useState(null);
-  const [confirmationImage, setConfirmation] = useState(null)
+  const [confirmationImage, setConfirmation] = useState(null);
 
   const [cropSize, setCropSize] = useState(300);
   const imageContainerRef = useRef(null); // 画像コンテナの参照を保持する
   const cropperRef = useRef(null);
 
   const previewCanvasRef = useRef(null);
-
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -105,37 +102,36 @@ const ListingForm = () => {
 
     image.onload = () => {
       // const canvas = previewCanvasRef.current;
-        const canvas = document.createElement("canvas");
-        canvas.width = cropSize;
-        canvas.height = cropSize;
-        const ctx = canvas.getContext("2d");
+      const canvas = document.createElement("canvas");
+      canvas.width = cropSize;
+      canvas.height = cropSize;
+      const ctx = canvas.getContext("2d");
 
-        const scrollX = imageContainerRef.current.scrollLeft; // X軸のスクロール位置
-        const scrollY = imageContainerRef.current.scrollTop; // Y軸のスクロール位置
+      const scrollX = imageContainerRef.current.scrollLeft; // X軸のスクロール位置
+      const scrollY = imageContainerRef.current.scrollTop; // Y軸のスクロール位置
 
-        ctx.clearRect(0, 0, cropSize, cropSize);
+      ctx.clearRect(0, 0, cropSize, cropSize);
 
-        ctx.drawImage(
-            image,
-            scrollX, // スクロールした位置をX軸の開始位置にする
-            scrollY, // スクロールした位置をY軸の開始位置にする
-            cropSize, // 切り取りサイズ
-            cropSize,
-            0,
-            0,
-            cropSize,
-            cropSize
-        );
+      ctx.drawImage(
+        image,
+        scrollX, // スクロールした位置をX軸の開始位置にする
+        scrollY, // スクロールした位置をY軸の開始位置にする
+        cropSize, // 切り取りサイズ
+        cropSize,
+        0,
+        0,
+        cropSize,
+        cropSize
+      );
 
-        // EXIF データを削除するために Blob に変換
-        canvas.toBlob((blob) => {
-            setCroppedImage(blob); // Blobをセット
-        }, "image/jpeg");
-        const croppedImageUrl = canvas.toDataURL("image/jpeg");
-        setConfirmation(croppedImageUrl);
-
+      // EXIF データを削除するために Blob に変換
+      canvas.toBlob((blob) => {
+        setCroppedImage(blob); // Blobをセット
+      }, "image/jpeg");
+      const croppedImageUrl = canvas.toDataURL("image/jpeg");
+      setConfirmation(croppedImageUrl);
     };
-};
+  };
 
   useEffect(() => {
     cropImage();
@@ -159,7 +155,6 @@ const ListingForm = () => {
     });
 
     if (!croppedImage) return;
-  
 
     const storageRef = ref(storage, `images/${Date.now()}.jpg`);
     await uploadBytes(storageRef, croppedImage);
@@ -171,7 +166,7 @@ const ListingForm = () => {
       alert("入力されていない項目があります");
       return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       //Firebaseにデータの送信
       const docRef = await addDoc(collection(db, "Produts"), {
@@ -185,14 +180,13 @@ const ListingForm = () => {
         image: downloadURL,
         seller_id: user.uid,
       });
-      setLoading(false)
-
+      setLoading(false);
 
       //入力を空にする
       alert("データがアップロードされました");
       setProductName("");
       setProductDetails("");
-      setCategory("option1");
+      setCategory("ファッション");
       setPrice("");
       setLocation("");
       setSelectedImage(null);
@@ -208,6 +202,8 @@ const ListingForm = () => {
     setCategory(event.target.value);
   };
 
+  const openCheckModal = () => setCheckModal(true); // モーダルを開く
+  const closeCheckModal = () => setCheckModal(false); // モーダルを閉じる
   //ログインモーダルの表示
   const openModal = () => {
     setIsModalOpen(true);
@@ -252,7 +248,11 @@ const ListingForm = () => {
           />
           {selectedImage && (
             <>
-              <div ref={imageContainerRef} className={styles.imageContainer} onScroll={handleScroll}>
+              <div
+                ref={imageContainerRef}
+                className={styles.imageContainer}
+                onScroll={handleScroll}
+              >
                 <img src={selectedImage} alt="Selected" />
               </div>
               <div className={styles.controls}>
@@ -286,7 +286,7 @@ const ListingForm = () => {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form onSubmit={(e) => e.preventDefault()} className={styles.form}>
           <div className={styles.inputGroup}>
             <label>商品名と詳細</label>
             <input
@@ -304,7 +304,11 @@ const ListingForm = () => {
             />
           </div>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            onClick={openCheckModal}
+          >
             出品
           </button>
 
@@ -348,8 +352,21 @@ const ListingForm = () => {
           </div>
         </form>
       </div>
-    </ Suspense>
+      {checkModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>入力内容の確認</h3>
+            <p><strong>商品名:</strong>{productName}</p>
+            <p><strong>説明:</strong>{productDetails}</p>
+            <p><strong>カテゴリー:</strong>{category}</p>
+            <p><strong>金額:</strong>{price}</p>
+            <p><strong>受取場所:</strong>{location}</p>
+            <button className={styles.eButton} onClick={closeCheckModal}>編集に戻る</button>
+            <button className={styles.gButton} onClick={handleSubmit}>確定して送信</button>
+          </div>
+        </div>
+      )}
+    </Suspense>
   );
 };
 export default ListingForm;
-
