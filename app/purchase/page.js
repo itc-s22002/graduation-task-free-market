@@ -117,7 +117,7 @@ const Purchase = () => {
         body: JSON.stringify({
           subject: "test",
           text: tex,
-          email: user.email,
+          email: seller.email,
         }),
       });
 
@@ -186,13 +186,6 @@ const Purchase = () => {
     if (item.statas == "交渉中" && item.seller_id != user.uid) {
       return (
         <>
-          {/* <button
-            type="submit"
-            className={styles.submitButton}
-            onClick={() => onPurchase(user.uid)}
-          >
-            購入
-          </button> */}
           <button
             onClick={() => onPurchase(user.uid)}
             disabled={loading}
