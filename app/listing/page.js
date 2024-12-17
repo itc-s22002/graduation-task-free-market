@@ -141,9 +141,16 @@ const ListingForm = () => {
     cropImage();
   };
 
+  const onhan = () => {
+    // e.preventDefault();
+    closeCheckModal();
+    handleSubmit();
+    router.push("/")
+  }
+
   //出品商品情報をアップロート
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    closeCheckModal();
     // 出品処理をここに追加
     console.log({
       name: productName,
@@ -362,7 +369,7 @@ const ListingForm = () => {
             <p><strong>金額:</strong>{price}</p>
             <p><strong>受取場所:</strong>{location}</p>
             <button className={styles.eButton} onClick={closeCheckModal}>編集に戻る</button>
-            <button className={styles.gButton} onClick={handleSubmit}>確定して送信</button>
+            <button className={styles.gButton} onClick={onhan}>確定して送信</button>
           </div>
         </div>
       )}
