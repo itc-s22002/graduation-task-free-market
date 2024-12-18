@@ -261,7 +261,7 @@ const Detail = () => {
                 </div>
                 {user && (
                   <>
-                    {item.statas == "購入" || item.seller_id != user.uid ? (
+                    {item.statas == "購入" || item.buyer_id == user.uid ? (
                       <></>
                     ) : (
                       <>
